@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>STORE WALLET</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+:root {
+  --black:#080808;--dark:#101010;--dark2:#181818;--dark3:#202020;
+  --accent:#c8860a;--accent2:#e8a82a;
+  --accent-glow:rgba(200,134,10,0.12);
+  --white:#f0ece4;--gray:#6a6660;--gray2:#2e2c2a;
+  --border:rgba(200,134,10,0.18);--border2:rgba(200,134,10,0.4);
+  --red:#c0392b;--green:#1a6a3a;--green2:#2a9a5a;--radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--black);color:var(--white);min-height:100vh;max-width:430px;margin:0 auto}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--dark);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.14em;color:var(--accent2)}
+.topbar-back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--gray);background:none;border:none;transition:color .15s}
+.topbar-back:active{color:var(--accent2)}
+/* HOME */
+#home{background:var(--black);align-items:center;justify-content:center;position:relative;overflow:hidden}
+#home::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 38%,var(--accent-glow),transparent 68%);pointer-events:none}
+.home-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%;padding:0 0 40px}
+.home-logo{text-align:center;margin-bottom:56px}
+.home-logo-name{font-family:'Bebas Neue',sans-serif;font-size:100px;letter-spacing:.18em;color:var(--white);line-height:1}
+.home-logo-sub{font-size:10px;letter-spacing:.35em;color:var(--accent);margin-top:8px;font-weight:700}
+.home-logo-addr{font-size:10px;letter-spacing:.1em;color:var(--gray);margin-top:6px}
+.home-btns{display:flex;flex-direction:column;gap:12px;width:100%;padding:0 32px}
+.home-btn{width:100%;padding:18px;border-radius:var(--radius);border:none;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.22em;cursor:pointer;transition:all .15s}
+.home-btn:active{transform:scale(0.97)}
+.home-btn-owner{background:var(--accent);color:var(--black)}
+.home-btn-customer{background:transparent;color:var(--accent2);border:1px solid var(--border2)}
+.home-btn-text{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:.2em;background:none;border:none;color:var(--gray);cursor:pointer;padding:8px;margin-top:4px}
+.home-copyright{font-size:10px;color:var(--gray);letter-spacing:.12em;margin-top:36px}
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+/* BALANCE */
+.balance-card{background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;position:relative;overflow:hidden}
+.balance-card::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:var(--accent-glow)}
+.balance-label{font-size:10px;letter-spacing:.22em;color:var(--accent);margin-bottom:8px;font-weight:700}
+.balance-amount{font-family:'DM Mono',monospace;font-size:44px;font-weight:500;color:var(--white);letter-spacing:-.02em}
+.balance-amount span{font-size:22px;opacity:.6;margin-right:2px}
+.balance-name{font-size:12px;color:var(--gray);margin-top:12px;letter-spacing:.06em}
+/* SECTION */
+.section-head{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.22em;padding:4px 0 2px}
+/* CARD */
+.card{background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+/* CUSTOMER */
+.customer-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s}
+.customer-item:active{border-color:var(--border2)}
+.customer-avatar{width:44px;height:44px;border-radius:50%;background:var(--accent-glow);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent2);flex-shrink:0}
+.customer-info{flex:1}
+.customer-name{font-size:15px;font-weight:700;color:var(--white)}
+.customer-sub{font-size:11px;color:var(--gray);margin-top:2px;letter-spacing:.06em}
+.customer-arrow{color:var(--accent);font-size:18px}
+/* BUTTONS */
+.btn{width:100%;padding:16px;border-radius:var(--radius);border:none;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.18em;cursor:pointer;transition:all .15s}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--accent);color:var(--black)}
+.btn-secondary{background:transparent;color:var(--white);border:1px solid var(--gray2)}
+.btn-green{background:var(--green);color:var(--white)}
+.btn-danger{background:var(--red);color:var(--white)}
+/* FORM */
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.18em}
+.form-input{padding:14px 16px;border-radius:var(--radius);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--white);background:var(--dark3);width:100%;outline:none;transition:border-color .15s}
+.form-input:focus{border-color:var(--accent)}
+.form-input::placeholder{color:var(--gray2)}
+.form-input-text{font-family:'Noto Sans JP',sans-serif;font-size:16px}
+/* PRESETS */
+.amount-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.preset-btn{padding:12px 8px;border-radius:10px;border:1px solid var(--border);background:var(--dark3);font-family:'DM Mono',monospace;font-size:13px;color:var(--gray);cursor:pointer;transition:all .15s;text-align:center}
+.preset-btn:active{background:var(--accent);color:var(--black);border-color:var(--accent)}
+/* TX */
+.tx-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius)}
+.tx-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.tx-icon.charge{background:rgba(26,106,58,0.3);color:#4aaa7a}
+.tx-icon.pay{background:rgba(192,57,43,0.3);color:#e07060}
+.tx-info{flex:1}
+.tx-title{font-size:13px;font-weight:500;color:var(--white)}
+.tx-date{font-size:10px;color:var(--gray);margin-top:2px}
+.tx-amount{font-family:'DM Mono',monospace;font-size:14px;font-weight:500}
+.tx-amount.charge{color:#4aaa7a}
+.tx-amount.pay{color:#e07060}
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.stat-label{font-size:10px;color:var(--accent);letter-spacing:.14em;margin-bottom:6px;font-weight:700}
+.stat-value{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--white)}
+/* RANKING */
+.ranking-card{background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.ranking-header{padding:14px 16px;border-bottom:1px solid var(--border)}
+.ranking-header-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.2em;color:var(--accent2)}
+.ranking-header-sub{font-size:10px;color:var(--gray);letter-spacing:.1em;margin-top:2px}
+.ranking-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(200,134,10,0.06)}
+.ranking-item:last-child{border-bottom:none}
+.ranking-item.me{background:rgba(200,134,10,0.05)}
+.ranking-rank{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gray);width:28px;text-align:center;flex-shrink:0}
+.ranking-rank.gold{color:#f5c84a}
+.ranking-rank.silver{color:#b0b0b0}
+.ranking-rank.bronze{color:#cd7f32}
+.ranking-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent-glow);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--accent2);flex-shrink:0}
+.ranking-name{flex:1;font-size:14px;font-weight:700;color:var(--white)}
+.ranking-pts{text-align:right}
+.ranking-pts-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent2);letter-spacing:.05em}
+.ranking-pts-label{font-size:9px;color:var(--gray);letter-spacing:.12em}
+.ranking-bar-wrap{height:3px;background:var(--dark3);border-radius:2px;margin-top:4px;width:80px}
+.ranking-bar{height:3px;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+/* COLOR SWATCHES */
+.color-swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.swatch.active{border-color:var(--white);transform:scale(1.15)}
+/* TOAST */
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--accent);color:var(--black);padding:12px 24px;border-radius:24px;font-size:13px;font-weight:700;letter-spacing:.1em;z-index:1000;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
+/* MODAL */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;display:none;align-items:flex-end}
+#modal-overlay.show{display:flex}
+#modal-box{background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:430px;margin:0 auto;padding:24px 20px 40px;display:flex;flex-direction:column;gap:16px}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.18em;text-align:center;color:var(--accent2)}
+.modal-body{display:flex;flex-direction:column;gap:12px}
+/* ADD BTN */
+.add-customer-btn{display:flex;align-items:center;justify-content:center;padding:14px;border-radius:var(--radius);border:1px dashed var(--border);background:none;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.15em;color:var(--gray);cursor:pointer;width:100%;transition:all .15s}
+.add-customer-btn:active{border-color:var(--accent);color:var(--accent)}
+/* PIN */
+.pin-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;gap:28px;background:var(--black)}
+.pin-logo{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:.3em;color:var(--accent)}
+.pin-title{font-size:11px;color:var(--gray);letter-spacing:.2em;margin-top:-16px;font-family:'Bebas Neue',sans-serif}
+.pin-dots{display:flex;gap:16px}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--gray2);transition:all .2s}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent);box-shadow:0 0 8px rgba(200,134,10,0.5)}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.pin-key{aspect-ratio:1.4;border-radius:var(--radius);border:1px solid var(--border);background:var(--dark2);color:var(--white);font-family:'DM Mono',monospace;font-size:24px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s}
+.pin-key:active{background:var(--accent);color:var(--black);border-color:var(--accent)}
+.pin-key.del{font-size:16px;color:var(--gray)}
+.pin-key.empty{background:none;border:none;cursor:default}
+/* PAY CONFIRM */
+.pay-confirm-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;gap:20px;background:var(--black)}
+.pay-confirm-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(200,134,10,0.05),transparent 70%);pointer-events:none}
+/* SYNC */
+#sync-status{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--gray);letter-spacing:.1em;padding:4px 0}
+.sync-dot{width:6px;height:6px;border-radius:50%}
+.sync-dot.ok{background:var(--green2)}
+.sync-dot.ng{background:var(--red)}
+.sync-dot.loading{background:var(--accent);animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* EMPTY */
+.empty-state{text-align:center;padding:40px 24px;color:var(--gray)}
+.empty-state .icon{font-size:36px;margin-bottom:10px;opacity:.4}
+.empty-state p{font-size:12px;line-height:1.8;letter-spacing:.04em}
+/* HOW TO */
+.how-step{display:flex;gap:14px;align-items:flex-start}
+.how-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--black);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.how-title{font-size:13px;font-weight:700;margin-bottom:4px;color:var(--white)}
+.how-desc{font-size:12px;color:var(--gray);line-height:1.8}
+.how-divider{height:1px;background:var(--border)}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div id="modal-overlay"><div id="modal-box"></div></div>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="home-inner">
+    <div class="home-logo">
+      <div class="home-logo-name" id="home-store-name">STORE WALLET</div>
+      <div class="home-logo-sub">STORE WALLET</div>
+      <div class="home-logo-addr" id="home-store-addr">苫小牧市澄川町 4-2-5</div>
+    </div>
+    <div class="home-btns">
+      <button class="home-btn home-btn-owner" onclick="goOwnerPin()">OWNER</button>
+      <button class="home-btn home-btn-customer" onclick="goCustomerSelect()">MEMBER</button>
+      <button class="home-btn-text" onclick="showScreen('how-to-use')">HOW TO USE</button>
+    </div>
+    <div class="home-copyright" id="home-copyright">© STORE WALLET 2026</div>
+  </div>
+</div>
+
+<!-- MERIT PAGE -->
+<div id="merit-page" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('home')">&#8592;</button>
+    <div class="topbar-title">お店のお得</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="content">
+
+    <!-- ネットワーク構造 -->
+    <div class="section-head">仕組み</div>
+    <!-- 上段：3ノード -->
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+      <div style="flex:1;background:rgba(13,110,86,0.15);border:1px solid rgba(13,110,86,0.4);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.1em;color:var(--accent2)">NETLIFY</div>
+        <div style="font-size:10px;color:var(--gray);margin-top:2px">画面を配信</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0">
+        <div style="font-size:9px;color:var(--gray)">HTML</div>
+        <div style="font-size:14px;color:rgba(13,110,86,0.8)">→</div>
+      </div>
+      <div style="flex:1;background:rgba(83,74,183,0.12);border:1px solid rgba(83,74,183,0.4);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:12px;font-weight:700;color:var(--white)">タブレット</div>
+        <div style="font-size:10px;color:var(--gray);margin-top:2px">スマホ</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;margin-top:-12px">
+        <div style="font-size:9px;color:var(--gray)">データ</div>
+        <div style="font-size:14px;color:rgba(200,134,10,0.8)">⇄</div>
+      </div>
+      <div style="flex:1;background:rgba(200,134,10,0.12);border:1px solid rgba(200,134,10,0.4);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.1em;color:var(--accent2)">FIREBASE</div>
+        <div style="font-size:10px;color:var(--gray);margin-top:2px">データを保存</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--gray);text-align:center;padding:4px 0 8px;letter-spacing:.04em">URLを開くだけで使える — ネット接続が必要</div>
+    <!-- 下段：3パターン -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+      <div style="background:rgba(83,74,183,0.1);border:1px solid rgba(83,74,183,0.3);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:11px;font-weight:700;color:var(--white);margin-bottom:6px">ローカル</div>
+        <div style="font-size:10px;color:var(--gray);line-height:1.7">file://で起動<br>Firebase接続</div>
+        <div style="font-size:12px;color:#e07060;margin-top:4px">ブロック ❌</div>
+      </div>
+      <div style="background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:11px;font-weight:700;color:var(--white);margin-bottom:6px">ネットなし</div>
+        <div style="font-size:10px;color:var(--gray);line-height:1.7">Firebase<br>に繋がらない</div>
+        <div style="font-size:12px;color:#e07060;margin-top:4px">保存不可 ❌</div>
+      </div>
+      <div style="background:rgba(13,110,86,0.12);border:1px solid rgba(13,110,86,0.4);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:11px;font-weight:700;color:var(--white);margin-bottom:6px">URLで開く</div>
+        <div style="font-size:10px;color:var(--gray);line-height:1.7">Netlifyの<br>URLでアクセス</div>
+        <div style="font-size:12px;color:#4aaa7a;margin-top:4px">全機能 ✅</div>
+      </div>
+    </div>
+
+    <!-- 原価シミュレーション -->
+    <div style="background:var(--dark3);border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:11px;color:var(--gray);line-height:1.9">
+      ※ <span style="color:var(--white)">NETLIFY（ネットリファイ）</span>… 画面を配信するサービス<br>
+      ※ <span style="color:var(--white)">FIREBASE（ファイアベース）</span>… データを保存・同期するサービス
+    </div>
+    <div class="section-head" style="margin-top:4px">原価シミュレーション</div>
+    <div style="font-size:10px;color:var(--gray);padding:2px 0 8px;line-height:1.8">
+      チャージ ¥5,000 / プレミアム 20%（+¥1,000）/ 飲み物 ¥1,000 / 原価 ¥175
+    </div>
+
+    <!-- ① -->
+    <div style="background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:8px">
+      <div style="background:rgba(192,57,43,0.12);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.1em;color:#e07060">① PayPayそのまま</span>
+        <span style="font-size:11px;color:var(--gray)">5杯分</span>
+      </div>
+      <div style="padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--gray)">売上（領収書）</span><span style="font-family:'DM Mono',monospace;color:var(--white)">¥5,000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--gray)">PayPay手数料 1.6%（内部コスト）</span><span style="font-family:'DM Mono',monospace;color:#e07060">-¥80</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--gray)">原価（¥175×5杯）</span><span style="font-family:'DM Mono',monospace;color:var(--gray)">-¥875</span>
+        </div>
+        <div style="height:1px;background:var(--border)"></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700">
+          <span style="color:var(--white)">実質利益</span><span style="font-family:'DM Mono',monospace;color:var(--white)">¥4,045</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">
+          <div style="background:var(--dark3);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:2px">利益率</div>
+            <div style="font-family:'DM Mono',monospace;font-size:18px;color:#4aaa7a">80.9%</div>
+            <div style="font-size:9px;color:var(--gray);margin-top:2px">4,045÷5,000</div>
+          </div>
+          <div style="background:var(--dark3);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:2px">お客さんの得</div>
+            <div style="font-family:'DM Mono',monospace;font-size:18px;color:#e07060">¥0</div>
+            <div style="font-size:9px;color:var(--gray);margin-top:2px">ボーナスなし</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② -->
+    <div style="background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:8px">
+      <div style="background:rgba(200,134,10,0.12);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.1em;color:var(--accent2)">② PayPayチャージ 20%</span>
+        <span style="font-size:11px;color:var(--gray)">5杯+ボーナス1杯</span>
+      </div>
+      <div style="padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--gray)">売上（領収書）</span><span style="font-family:'DM Mono',monospace;color:var(--white)">¥5,000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--gray)">PayPay手数料 1.6%（内部コスト）</span><span style="font-family:'DM Mono',monospace;color:#e07060">-¥80</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--gray)">通常原価（¥175×5杯）</span><span style="font-family:'DM Mono',monospace;color:var(--gray)">-¥875</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--gray)">ボーナス原価（1杯分）</span><span style="font-family:'DM Mono',monospace;color:var(--accent2)">-¥175</span>
+        </div>
+        <div style="background:rgba(200,134,10,0.08);border-radius:6px;padding:6px 8px;font-size:10px;color:var(--gray)">
+          ※ボーナス¥1,000はお客さんが感じる価値。実際のコストは原価¥175のみ。
+        </div>
+        <div style="height:1px;background:var(--border)"></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700">
+          <span style="color:var(--white)">実質利益</span><span style="font-family:'DM Mono',monospace;color:var(--white)">¥3,870</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px">
+          <div style="background:var(--dark3);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:2px">利益率</div>
+            <div style="font-family:'DM Mono',monospace;font-size:16px;color:var(--accent2)">77.4%</div>
+            <div style="font-size:9px;color:var(--gray);margin-top:2px">3,870÷5,000</div>
+          </div>
+          <div style="background:var(--dark3);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:2px">実質利益</div>
+            <div style="font-family:'DM Mono',monospace;font-size:16px;color:var(--accent2)">¥3,870</div>
+          </div>
+          <div style="background:var(--dark3);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:2px">客の得</div>
+            <div style="font-family:'DM Mono',monospace;font-size:16px;color:#4aaa7a">¥1,000</div>
+            <div style="font-size:9px;color:var(--gray);margin-top:2px">原価¥175</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ -->
+    <div style="background:var(--dark2);border:1px solid rgba(13,110,86,0.5);border-radius:var(--radius);overflow:hidden;margin-bottom:8px">
+      <div style="background:rgba(13,110,86,0.15);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(13,110,86,0.3)">
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.1em;color:#4aaa7a">③ 現金チャージ 20%</span>
+        <span style="font-size:10px;color:#4aaa7a;font-weight:700">★ BEST</span>
+      </div>
+      <div style="padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--gray)">売上（領収書）</span><span style="font-family:'DM Mono',monospace;color:var(--white)">¥5,000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--gray)">手数料</span><span style="font-family:'DM Mono',monospace;color:#4aaa7a">¥0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--gray)">通常原価（¥175×5杯）</span><span style="font-family:'DM Mono',monospace;color:var(--gray)">-¥875</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--gray)">ボーナス原価（1杯分）</span><span style="font-family:'DM Mono',monospace;color:#4aaa7a">-¥175</span>
+        </div>
+        <div style="background:rgba(13,110,86,0.08);border-radius:6px;padding:6px 8px;font-size:10px;color:var(--gray)">
+          ※ボーナス¥1,000はお客さんが感じる価値。実際のコストは原価¥175のみ。
+        </div>
+        <div style="height:1px;background:rgba(13,110,86,0.3)"></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700">
+          <span style="color:#4aaa7a">実質利益</span><span style="font-family:'DM Mono',monospace;color:#4aaa7a">¥3,950</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px">
+          <div style="background:var(--dark3);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:2px">利益率</div>
+            <div style="font-family:'DM Mono',monospace;font-size:16px;color:#4aaa7a">79.0%</div>
+            <div style="font-size:9px;color:var(--gray);margin-top:2px">3,950÷5,000</div>
+          </div>
+          <div style="background:var(--dark3);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:2px">実質利益</div>
+            <div style="font-family:'DM Mono',monospace;font-size:16px;color:#4aaa7a">¥3,950</div>
+          </div>
+          <div style="background:var(--dark3);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:2px">客の得</div>
+            <div style="font-family:'DM Mono',monospace;font-size:16px;color:#4aaa7a">¥1,000</div>
+            <div style="font-size:9px;color:var(--gray);margin-top:2px">原価¥175</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 比較まとめ -->
+    <div style="background:var(--dark3);border-radius:10px;padding:12px 14px;margin-bottom:4px">
+      <div style="font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:8px">まとめ比較（¥5,000チャージ基準）</div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4px;font-size:10px">
+        <div style="color:var(--gray)">方法</div>
+        <div style="color:var(--gray);text-align:right">利益率</div>
+        <div style="color:var(--gray);text-align:right">実質利益</div>
+        <div style="color:var(--gray);text-align:right">客の得</div>
+        <div style="color:var(--white);padding-top:4px;border-top:0.5px solid var(--border)">①PayPayそのまま</div>
+        <div style="font-family:'DM Mono',monospace;color:#4aaa7a;text-align:right;padding-top:4px;border-top:0.5px solid var(--border)">80.9%</div>
+        <div style="font-family:'DM Mono',monospace;color:var(--white);text-align:right;padding-top:4px;border-top:0.5px solid var(--border)">¥4,045</div>
+        <div style="font-family:'DM Mono',monospace;color:#e07060;text-align:right;padding-top:4px;border-top:0.5px solid var(--border)">¥0</div>
+        <div style="color:var(--white);padding-top:4px">②PayPayチャージ</div>
+        <div style="font-family:'DM Mono',monospace;color:var(--accent2);text-align:right;padding-top:4px">77.4%</div>
+        <div style="font-family:'DM Mono',monospace;color:var(--white);text-align:right;padding-top:4px">¥3,870</div>
+        <div style="font-family:'DM Mono',monospace;color:#4aaa7a;text-align:right;padding-top:4px">¥1,000分</div>
+        <div style="color:#4aaa7a;font-weight:700;padding-top:4px">③現金チャージ★</div>
+        <div style="font-family:'DM Mono',monospace;color:#4aaa7a;text-align:right;padding-top:4px;font-weight:700">79.0%</div>
+        <div style="font-family:'DM Mono',monospace;color:#4aaa7a;text-align:right;padding-top:4px;font-weight:700">¥3,950</div>
+        <div style="font-family:'DM Mono',monospace;color:#4aaa7a;text-align:right;padding-top:4px;font-weight:700">¥1,000分</div>
+      </div>
+      <div style="font-size:10px;color:var(--gray);margin-top:10px;line-height:1.8;border-top:0.5px solid var(--border);padding-top:8px">
+        ①と③の利益率差は<span style="color:var(--white);font-family:'DM Mono',monospace">わずか1.9%（¥95）</span>。<br>
+        ③は¥175のコストでお客さんに¥1,000の満足感を提供し、リピートを生む。
+      </div>
+    </div>
+
+    <!-- 参考計算式 -->
+    <div style="background:var(--dark3);border-radius:10px;padding:12px 14px;font-size:11px;line-height:2;font-family:'DM Mono',monospace;color:var(--gray)">
+      <div style="color:var(--accent);font-size:10px;letter-spacing:.1em;margin-bottom:4px;font-family:'Noto Sans JP',sans-serif">参考計算式</div>
+      <div>実質利益 = 売上 − 手数料 − 原価 − ボーナス原価</div>
+      <div>利益率　 = 実質利益 ÷ 売上 × 100</div>
+    </div>
+    <!-- 参考計算式 -->
+    <div style="background:var(--dark3);border-radius:10px;padding:12px 14px;font-size:11px;line-height:2;font-family:'DM Mono',monospace;color:var(--gray)">
+      <div style="color:var(--accent);font-size:10px;letter-spacing:.1em;margin-bottom:4px;font-family:'Noto Sans JP',sans-serif">参考計算式</div>
+      <div>利益率 = 実質利益 ÷ 手取り × 100</div>
+      <div>実質利益 = 手取り − 原価</div>
+    </div>
+
+    <!-- 利益率・実質利益の説明 -->
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.1em">利益率と実質利益</div>
+
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div style="background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);border-radius:8px;padding:6px 10px;font-family:'Bebas Neue',sans-serif;font-size:16px;color:#e07060;flex-shrink:0;min-width:28px;text-align:center">①</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--white);margin-bottom:3px">PayPayそのまま</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.8">
+            利益率：4,045 ÷ 5,000 = <span style="color:#4aaa7a;font-family:'DM Mono',monospace">80.9%</span>（高い）<br>
+            実質利益：<span style="color:var(--white);font-family:'DM Mono',monospace">¥4,045</span><br>
+            お客さんのボーナスなし。手数料だけ引かれる。
+          </div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--border)"></div>
+
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div style="background:rgba(200,134,10,0.15);border:1px solid rgba(200,134,10,0.3);border-radius:8px;padding:6px 10px;font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--accent2);flex-shrink:0;min-width:28px;text-align:center">②</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--white);margin-bottom:3px">PayPayチャージ 20%</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.8">
+            利益率：3,870 ÷ 5,000 = <span style="color:#e07060;font-family:'DM Mono',monospace">77.4%</span>（やや低い）<br>
+            実質利益：<span style="color:var(--accent2);font-family:'DM Mono',monospace">¥3,870</span><br>
+            ボーナス原価¥175のみで<span style="color:var(--accent2)">お客さんに¥1,000の満足感</span>を提供。<br>
+            PayPay手数料¥80が内部コストとなる。
+          </div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--border)"></div>
+
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div style="background:rgba(13,110,86,0.15);border:1px solid rgba(13,110,86,0.4);border-radius:8px;padding:6px 10px;font-family:'Bebas Neue',sans-serif;font-size:16px;color:#4aaa7a;flex-shrink:0;min-width:28px;text-align:center">③</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--white);margin-bottom:3px">現金チャージ 20%</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.8">
+            利益率：3,950 ÷ 5,000 = <span style="color:#4aaa7a;font-family:'DM Mono',monospace">79.0%</span><br>
+            実質利益：<span style="color:#4aaa7a;font-family:'DM Mono',monospace">¥3,950</span>（①との差わずか¥95）<br>
+            手数料ゼロ＋ボーナス原価¥175のみ。<br>
+            <span style="color:#4aaa7a">①と差はほぼなく、お客さんに¥1,000の満足感を提供。</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--dark3);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--gray);line-height:1.8;border-left:3px solid var(--accent)">
+        💡 利益率は①が高く見えますが、②③はお客さんへのボーナスで<strong style="color:var(--white)">リピート来店が増える</strong>ため、月・年単位の実質利益は②③の方が大きくなります。
+      </div>
+    </div>
+
+    <div style="background:var(--dark3);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 14px;font-size:11px;color:var(--gray);line-height:1.9">
+      ①と③の実質利益の差は<span style="color:var(--white);font-family:'DM Mono',monospace">わずか¥95</span>。<br>
+      ③はボーナス原価<span style="color:var(--white);font-family:'DM Mono',monospace">¥175</span>だけで、お客さんに<span style="color:var(--accent2);font-family:'DM Mono',monospace">¥1,000</span>の満足感を提供できる。<br>
+      リピートが1回増えれば、¥95の差は簡単に逆転する。
+    </div>
+
+    <!-- チャージのメリット -->
+    <div class="section-head" style="margin-top:4px">チャージのメリット</div>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-glow);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💰</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;margin-bottom:4px;color:var(--white)">手数料ゼロ</div>
+          <div style="font-size:12px;color:var(--gray);line-height:1.8">現金チャージならカード手数料が一切かかりません。¥1,000の売上が¥1,000そのまま手元に残ります。</div>
+        </div>
+      </div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-glow);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🔄</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;margin-bottom:4px;color:var(--white)">リピート促進</div>
+          <div style="font-size:12px;color:var(--gray);line-height:1.8">チャージした分は必ずお店で使われます。先払いで売上が確定し、お客さんの来店動機になります。</div>
+        </div>
+      </div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-glow);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🏆</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;margin-bottom:4px;color:var(--white)">ボーナスポイントで差別化</div>
+          <div style="font-size:12px;color:var(--gray);line-height:1.8">プレミアム設定でボーナスを付与。¥5,000チャージで¥1,000お得になるお客さんは、他の店より優先してここに来ます。</div>
+        </div>
+      </div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-glow);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📊</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;margin-bottom:4px;color:var(--white)">売上の見える化</div>
+          <div style="font-size:12px;color:var(--gray);line-height:1.8">チャージ履歴・売上・累計がリアルタイムで確認できます。日々の経営判断に役立ちます。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- お店のお得哲学 -->
+    <div class="section-head" style="margin-top:4px">お店のお得哲学</div>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+
+      <div style="text-align:center;padding:8px 0">
+        <div style="font-size:11px;color:var(--gray);letter-spacing:.1em;margin-bottom:16px">1杯プレゼントの本当のコスト</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div style="background:var(--dark3);border-radius:10px;padding:14px">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:6px;letter-spacing:.08em">お客さんが感じる価値</div>
+            <div style="font-family:'DM Mono',monospace;font-size:28px;color:var(--accent2)">¥1,000</div>
+            <div style="font-size:10px;color:var(--gray);margin-top:4px">1杯分の満足感</div>
+          </div>
+          <div style="background:var(--dark3);border-radius:10px;padding:14px">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:6px;letter-spacing:.08em">お店の実際のコスト</div>
+            <div style="font-family:'DM Mono',monospace;font-size:28px;color:#4aaa7a">¥175</div>
+            <div style="font-size:10px;color:var(--gray);margin-top:4px">原価（平均）</div>
+          </div>
+        </div>
+        <div style="background:rgba(200,134,10,0.1);border:1px solid var(--border2);border-radius:10px;padding:12px">
+          <div style="font-size:11px;color:var(--gray);margin-bottom:4px">この差額</div>
+          <div style="font-family:'DM Mono',monospace;font-size:32px;color:var(--accent2)">¥825</div>
+          <div style="font-size:11px;color:var(--gray);margin-top:4px">がお客さんの「得した感」を生み出す</div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--border)"></div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="font-size:18px;flex-shrink:0">🏦</div>
+          <div style="font-size:12px;color:var(--gray);line-height:1.8">
+            カード会社は<span style="color:var(--white)">お店の手数料</span>でこの仕組みを作っている。手数料の一部をポイントとして還元するだけ。
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="font-size:18px;flex-shrink:0">📱</div>
+          <div style="font-size:12px;color:var(--gray);line-height:1.8">
+            このアプリは<span style="color:var(--accent2)">中間業者なし</span>で同じことができる。手数料はお店とお客さんの間だけで完結する。
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="font-size:18px;flex-shrink:0">💴</div>
+          <div style="font-size:12px;color:var(--gray);line-height:1.8">
+            現金チャージなら<span style="color:#4aaa7a">手数料ゼロ</span>。¥175のコストで¥1,000の満足感を提供できる。これがお店の強み。
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--dark3);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 14px">
+        <div style="font-size:12px;color:var(--white);line-height:1.9">
+          常連10人が月1回¥5,000チャージすると<br>
+          <span style="font-family:'DM Mono',monospace;color:var(--accent2)">月¥50,000</span>の売上が先払いで確定する。<br>
+          <span style="font-size:11px;color:var(--gray)">リピートは戦略、チャージは保証。</span>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="btn btn-primary" onclick="showScreen('home')" style="margin-top:4px">トップに戻る</button>
+    <div style="text-align:center;font-size:10px;color:var(--gray);letter-spacing:.12em;padding:8px 0">© STORE WALLET 2026</div>
+  </div>
+</div>
+
+<!-- HOW TO USE -->
+<div id="how-to-use" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('home')">&#8592;</button>
+    <div class="topbar-title">使い方</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="content">
+    <div class="card" style="border-color:var(--accent);background:var(--accent-glow)">
+      <div class="section-head" style="margin-bottom:8px">コンセプト</div>
+      <div style="font-size:13px;line-height:1.9;color:var(--white)">クレジットカードの手数料（約3%）をなくすための、お得な店内通貨です。現金でチャージしてお支払いに使えます。チャージのたびにボーナスポイントが貯まります。</div>
+    </div>
+    <div class="section-head">店主の方へ</div>
+    <div class="card" style="display:flex;flex-direction:column;gap:16px">
+      <div class="how-step"><div class="how-num">1</div><div><div class="how-title">初期設定</div><div class="how-desc">OWNER → PIN入力（初期値: 0000）→ 設定で店名・住所・PIN・テーマカラーを変更できます。お得な店内通貨をあなたのお店専用にカスタマイズできます。</div></div></div>
+      <div class="how-divider"></div>
+      <div class="how-step"><div class="how-num">2</div><div><div class="how-title">メンバー登録</div><div class="how-desc">「+ MEMBER追加」から名前と個別PINを設定します。最大10名まで登録できます。</div></div></div>
+      <div class="how-divider"></div>
+      <div class="how-step"><div class="how-num">3</div><div><div class="how-title">チャージ・支払い受付</div><div class="how-desc">メンバー名をタップして、チャージまたは支払い受付ができます。プレミアム設定でボーナスポイントが付与されます。</div></div></div>
+    </div>
+    <div class="section-head">メンバーの方へ</div>
+    <div class="card" style="display:flex;flex-direction:column;gap:16px">
+      <div class="how-step"><div class="how-num">1</div><div><div class="how-title">名前を選ぶ</div><div class="how-desc">MEMBER → 自分の名前をタップします。</div></div></div>
+      <div class="how-divider"></div>
+      <div class="how-step"><div class="how-num">2</div><div><div class="how-title">PIN入力</div><div class="how-desc">個別の4桁PINを入力すると、残高・利用履歴・ボーナスポイントランキングが確認できます。</div></div></div>
+      <div class="how-divider"></div>
+      <div class="how-step"><div class="how-num">3</div><div><div class="how-title">支払い</div><div class="how-desc">店主が金額を入力してタブレットを渡します。金額を確認して「PAY」を押すだけです。</div></div></div>
+    </div>
+    <button class="btn btn-primary" onclick="showScreen('home')" style="margin-top:4px">トップに戻る</button>
+    <div style="text-align:center;font-size:10px;color:var(--gray);letter-spacing:.12em;padding:8px 0" id="how-copyright">© STORE WALLET 2026</div>
+  </div>
+</div>
+
+<!-- HIDDEN SKATE GAME -->
+<div id="secret-game" class="screen">
+  <div style="background:var(--black);flex:1;display:flex;flex-direction:column">
+    <!-- ヘッダー -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--dark)">
+      <button onclick="skateExit()" style="background:none;border:none;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.15em;color:var(--gray);cursor:pointer">EXIT</button>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.2em;color:var(--accent2)">SKATE</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--accent2)" id="sk-score-disp">0</div>
+    </div>
+
+    <!-- キャンバス -->
+    <canvas id="skate-canvas" style="display:block;width:100%;height:200px;touch-action:none;background:#080810"></canvas>
+
+    <!-- ステータスバー -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px 16px;background:var(--dark)">
+      <div style="text-align:center">
+        <div style="font-size:9px;color:var(--gray);letter-spacing:.1em">SCORE</div>
+        <div id="sk-score" style="font-family:'DM Mono',monospace;font-size:16px;color:var(--white)">0</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:9px;color:var(--gray);letter-spacing:.1em">BEST</div>
+        <div id="sk-best" style="font-family:'DM Mono',monospace;font-size:16px;color:var(--accent2)">0</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:9px;color:var(--gray);letter-spacing:.1em">SPEED</div>
+        <div id="sk-speed" style="font-family:'DM Mono',monospace;font-size:16px;color:#4aaa7a">1x</div>
+      </div>
+    </div>
+
+    <!-- タップエリア -->
+    <div id="sk-tap-area" style="flex:1;display:flex;align-items:center;justify-content:center;cursor:pointer;min-height:80px" ontouchstart="skateJump()" onclick="skateJump()">
+      <div id="sk-tap-hint" style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.2em;color:var(--gray)">TAP TO JUMP</div>
+    </div>
+  </div>
+</div>
+
+<!-- OWNER PIN -->
+<div id="owner-pin" class="screen">
+  <div class="pin-screen">
+    <div class="pin-logo" id="owner-pin-logo">WALLET</div>
+    <div class="pin-title">OWNER PIN</div>
+    <div class="pin-dots" id="owner-pin-dots">
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div class="pin-keypad" id="owner-pin-keypad"></div>
+    <button class="btn btn-secondary" style="font-family:'Bebas Neue',sans-serif;letter-spacing:.2em" onclick="showScreen('home')">BACK</button>
+  </div>
+</div>
+
+<!-- OWNER HOME -->
+<div id="owner-home" class="screen">
+  <div class="topbar">
+    <div class="topbar-title">DASHBOARD</div>
+    <button class="topbar-back" onclick="showScreen('home')" style="font-size:11px;font-family:'Bebas Neue',sans-serif;letter-spacing:.12em;width:auto;color:var(--gray)">EXIT</button>
+  </div>
+  <div class="content">
+    <div id="sync-status"><span class="sync-dot loading" id="sync-dot"></span><span id="sync-text">接続中...</span></div>
+    <div class="section-head">TODAY</div>
+    <div class="stats-grid" id="owner-stats"></div>
+    <div class="section-head" style="margin-top:4px">MEMBERS</div>
+    <div id="owner-customer-list"></div>
+    <button class="add-customer-btn" onclick="showAddCustomer()">+ MEMBER を追加</button>
+    <button class="btn btn-secondary" onclick="showScreen('merit-page')" style="font-size:13px;padding:12px;letter-spacing:.1em;color:var(--accent2);border-color:var(--border2)">お店のお得 ▶</button>
+    <div class="section-head" style="margin-top:4px">SETTINGS</div>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-group">
+        <div class="form-label">店名</div>
+        <input class="form-input form-input-text" id="store-name-input" placeholder="店名を入力" oninput="saveStoreName(this.value)">
+      </div>
+      <div class="form-group">
+        <div class="form-label">住所・サブテキスト</div>
+        <input class="form-input form-input-text" id="store-addr-input" placeholder="SUMIKAWA 4-2-5, TOMAKOMAI" oninput="saveStoreAddr(this.value)">
+      </div>
+      <div class="form-group">
+        <div class="form-label">コピーライト表示</div>
+        <input class="form-input form-input-text" id="store-copy-input" placeholder="© 店名 2026" oninput="saveStoreCopy(this.value)">
+      </div>
+      <div class="form-group">
+        <div class="form-label">テーマカラー</div>
+        <div class="color-swatches" id="color-swatches"></div>
+      </div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div class="form-group">
+        <div class="form-label">OWNER PIN（4桁）</div>
+        <input class="form-input" type="number" id="pin-input" placeholder="0000" oninput="savePin(this.value)">
+      </div>
+      <div style="height:1px;background:var(--border)"></div>
+      <div class="form-group">
+        <div class="form-label">チャージプレミアム（%）</div>
+        <input class="form-input" type="number" id="premium-input" placeholder="0" inputmode="numeric" oninput="savePremium(this.value)">
+        <div id="premium-preview" style="font-size:11px;color:var(--gray);margin-top:4px;padding:8px 12px;background:var(--dark3);border-radius:8px;text-align:center;letter-spacing:.08em;font-family:'DM Mono',monospace"></div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:10px;color:var(--gray);letter-spacing:.12em;padding:16px 0" id="owner-copyright">© STORE WALLET 2026</div>
+  </div>
+</div>
+
+<!-- OWNER CUSTOMER DETAIL -->
+<div id="owner-customer-detail" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('owner-home')">&#8592;</button>
+    <div class="topbar-title" id="detail-customer-name">—</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="content">
+    <div class="balance-card">
+      <div class="balance-label">BALANCE</div>
+      <div class="balance-amount" id="detail-balance-amount"><span>¥</span>0</div>
+      <div class="balance-name" id="detail-balance-name">—</div>
+    </div>
+    <button class="btn btn-primary" onclick="goPayInput(window._currentCustomerId)">PAYMENT</button>
+    <div class="section-head">CHARGE</div>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-group">
+        <div class="form-label">金額（円）</div>
+        <input class="form-input" type="number" id="charge-amount" placeholder="0" inputmode="numeric" oninput="updateChargePreview(this.value)">
+      </div>
+      <div class="amount-presets">
+        <button class="preset-btn" onclick="setChargeAmount(500)">¥500</button>
+        <button class="preset-btn" onclick="setChargeAmount(1000)">¥1,000</button>
+        <button class="preset-btn" onclick="setChargeAmount(2000)">¥2,000</button>
+        <button class="preset-btn" onclick="setChargeAmount(3000)">¥3,000</button>
+        <button class="preset-btn" onclick="setChargeAmount(5000)">¥5,000</button>
+        <button class="preset-btn" onclick="setChargeAmount(10000)">¥10,000</button>
+      </div>
+      <!-- チャージ方法 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn btn-green" onclick="doCharge('cash')" style="font-size:14px;padding:14px">
+          現金<br><span style="font-size:11px;opacity:.7;font-family:'Noto Sans JP',sans-serif;letter-spacing:0">CASH</span>
+        </button>
+        <button class="btn" onclick="doCharge('paypay')" style="background:#e00;color:#fff;font-size:14px;padding:14px;border-radius:12px">
+          PayPay<br><span style="font-size:11px;opacity:.8;font-family:'Noto Sans JP',sans-serif;letter-spacing:0">受取済み</span>
+        </button>
+      </div>
+      <div id="charge-preview" style="font-size:11px;color:var(--gray);padding:8px 12px;background:var(--dark3);border-radius:8px;text-align:center;letter-spacing:.06em;font-family:'DM Mono',monospace;display:none"></div>
+    </div>
+    <div class="section-head">HISTORY</div>
+    <div id="detail-tx-list"></div>
+    <div class="section-head">MEMBER PIN 変更</div>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-group">
+        <div class="form-label">新しいPIN（4桁）</div>
+        <input class="form-input" type="number" id="member-pin-input" placeholder="0000" inputmode="numeric" maxlength="4">
+      </div>
+      <button class="btn btn-secondary" onclick="saveMemberPin()">PINを変更する</button>
+    </div>
+    <div style="margin-top:8px">
+      <button class="btn btn-secondary" onclick="showDeleteCustomer()" style="color:var(--red);border-color:rgba(192,57,43,0.3)">DELETE MEMBER</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER SELECT -->
+<div id="customer-select" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('home')">&#8592;</button>
+    <div class="topbar-title">MEMBERS</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="content" id="customer-select-list"></div>
+</div>
+
+<!-- CUSTOMER PIN -->
+<div id="customer-pin" class="screen">
+  <div class="pin-screen">
+    <div class="pin-logo" id="customer-pin-logo">WALLET</div>
+    <div class="pin-title" id="customer-pin-title">MEMBER PIN</div>
+    <div class="pin-dots" id="customer-pin-dots">
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div class="pin-keypad" id="customer-pin-keypad"></div>
+    <button class="btn btn-secondary" style="font-family:'Bebas Neue',sans-serif;letter-spacing:.2em" onclick="showScreen('customer-select')">BACK</button>
+  </div>
+</div>
+
+<!-- CUSTOMER WALLET -->
+<div id="customer-wallet" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('customer-select')">&#8592;</button>
+    <div class="topbar-title" id="wallet-customer-name">—</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="content">
+    <div class="balance-card">
+      <div class="balance-label">BALANCE</div>
+      <div class="balance-amount" id="wallet-balance"><span>¥</span>0</div>
+      <div class="balance-name" id="wallet-name-label">—</div>
+    </div>
+    <div class="section-head">ボーナスポイント RANKING</div>
+    <div class="ranking-card" id="dan-ranking"></div>
+    <div class="card" style="text-align:center;padding:14px;color:var(--gray);font-size:12px;line-height:1.9;letter-spacing:.06em">
+      お支払いは店主が金額を入力します<br>タブレットをカウンターへどうぞ
+    </div>
+    <div class="section-head">HISTORY</div>
+    <div id="wallet-tx-list"></div>
+    <div style="text-align:center;font-size:10px;color:var(--gray);letter-spacing:.12em;padding:16px 0" id="wallet-copyright">© STORE WALLET 2026</div>
+  </div>
+</div>
+
+<!-- PAY INPUT -->
+<div id="pay-input" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('owner-customer-detail')">&#8592;</button>
+    <div class="topbar-title" id="pay-input-name">—</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="content">
+    <div class="balance-card">
+      <div class="balance-label">BALANCE</div>
+      <div class="balance-amount" id="pay-input-balance"><span>¥</span>0</div>
+      <div class="balance-name" id="pay-input-balance-name">—</div>
+    </div>
+    <div class="section-head">請求金額</div>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-group">
+        <div class="form-label">金額（円）</div>
+        <input class="form-input" type="number" id="pay-amount" placeholder="0" inputmode="numeric">
+      </div>
+      <button class="btn btn-primary" onclick="goPayConfirm()">お客さんに渡す →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAY CONFIRM -->
+<div id="pay-confirm" class="screen">
+  <div class="pay-confirm-screen" style="position:relative">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.45em;color:var(--accent)">PAYMENT</div>
+    <div style="font-family:'DM Mono',monospace;font-size:72px;font-weight:500;color:var(--white);letter-spacing:-.02em" id="confirm-amount-display">¥0</div>
+    <div style="font-size:13px;color:var(--gray);letter-spacing:.1em" id="confirm-name-display">—</div>
+    <div style="width:100%;height:1px;background:var(--border)"></div>
+    <div style="text-align:center">
+      <div style="font-size:10px;color:var(--accent);letter-spacing:.18em;margin-bottom:6px;font-family:'Bebas Neue',sans-serif">支払い後の残高</div>
+      <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--gray)" id="confirm-after-balance">¥0</div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;font-size:24px;padding:22px;letter-spacing:.25em" id="pay-execute-btn">PAY</button>
+    <button class="btn btn-secondary" style="width:100%;font-family:'Bebas Neue',sans-serif;letter-spacing:.2em" onclick="showScreen('pay-input')">CANCEL</button>
+    <div style="font-size:10px;color:var(--gray);letter-spacing:.12em" id="confirm-copyright">© STORE WALLET 2026</div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyCxLwJZKjbo-ucomVbAD1_LJxhL5SSYDpc",
+  authDomain:"dna-wallet-57c0a.firebaseapp.com",
+  databaseURL:"https://dna-wallet-57c0a-default-rtdb.firebaseio.com",
+  projectId:"dna-wallet-57c0a",
+  storageBucket:"dna-wallet-57c0a.firebasestorage.app",
+  messagingSenderId:"499466077674",
+  appId:"1:499466077674:web:c0fffd682b9bb4008a1e93"
+});
+const db = firebase.database();
+
+// ===== STATE =====
+let STATE = { storeName:'STORE WALLET', storeAddr:'SUMIKAWA 4-2-5, TOMAKOMAI', storeCopy:'© STORE WALLET 2026', themeColor:'#c8860a', pin:'0000', premium:0, customers:{}, transactions:{} };
+let currentCustomerId = null;
+window._currentCustomerId = null;
+let ownerPinBuffer = '';
+let customerPinBuffer = '';
+let pendingPayAmount = 0;
+
+// テーマカラー候補
+const COLORS = [
+  {name:'amber',  val:'#c8860a'},
+  {name:'blue',   val:'#1a6aaa'},
+  {name:'red',    val:'#a02020'},
+  {name:'green',  val:'#1a7a3a'},
+  {name:'purple', val:'#6a2a9a'},
+  {name:'white',  val:'#c8c4bc'},
+];
+
+// ===== SYNC STATUS =====
+function setSyncStatus(s) {
+  const dot=document.getElementById('sync-dot'), txt=document.getElementById('sync-text');
+  if(!dot||!txt) return;
+  dot.className='sync-dot '+s;
+  txt.textContent = s==='ok'?'オンライン — 同期済み':s==='ng'?'オフライン':'接続中...';
+}
+
+// ===== REALTIME =====
+db.ref('/').on('value', snap => {
+  const d = snap.val()||{};
+  STATE.storeName    = d.storeName    || 'STORE WALLET';
+  STATE.storeAddr    = d.storeAddr    || 'SUMIKAWA 4-2-5, TOMAKOMAI';
+  STATE.storeCopy    = d.storeCopy    || '© STORE WALLET 2026';
+  STATE.themeColor   = d.themeColor   || '#c8860a';
+  STATE.pin          = d.pin          || '0000';
+  STATE.premium      = parseFloat(d.premium) || 0;
+  STATE.customers    = d.customers    || {};
+  STATE.transactions = d.transactions || {};
+  setSyncStatus('ok');
+  applyTheme();
+  updateHomeText();
+  const active = document.querySelector('.screen.active');
+  if (!active) return;
+  const id = active.id;
+  if (id==='owner-home') renderOwnerHome();
+  if (id==='owner-customer-detail') refreshDetail();
+  if (id==='customer-select') renderCustomerSelect();
+  if (id==='customer-wallet') refreshWallet();
+}, ()=>setSyncStatus('ng'));
+
+// ===== THEME =====
+function applyTheme() {
+  const c = STATE.themeColor||'#c8860a';
+  const hex2rgb = h => { const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `${r},${g},${b}`; };
+  const rgb = hex2rgb(c);
+  document.documentElement.style.setProperty('--accent', c);
+  document.documentElement.style.setProperty('--accent2', c);
+  document.documentElement.style.setProperty('--accent-glow', `rgba(${rgb},0.12)`);
+  document.documentElement.style.setProperty('--border', `rgba(${rgb},0.18)`);
+  document.documentElement.style.setProperty('--border2', `rgba(${rgb},0.4)`);
+}
+
+function updateHomeText() {
+  const n=document.getElementById('home-store-name');
+  const a=document.getElementById('home-store-addr');
+  const c=document.getElementById('home-copyright');
+  if(n) n.textContent = STATE.storeName||'STORE WALLET';
+  if(a) a.textContent = STATE.storeAddr||'';
+  if(c) c.textContent = STATE.storeCopy||'';
+  // pin logo
+  ['owner-pin-logo','customer-pin-logo'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent = STATE.storeName||'STORE WALLET';
+  });
+  // copyright 各所
+  ['how-copyright','owner-copyright','wallet-copyright','confirm-copyright'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent = STATE.storeCopy||'';
+  });
+}
+
+function renderColorSwatches() {
+  const el=document.getElementById('color-swatches');
+  if(!el) return;
+  el.innerHTML = COLORS.map(c=>`
+    <div class="swatch ${STATE.themeColor===c.val?'active':''}" style="background:${c.val}" onclick="setThemeColor('${c.val}')"></div>
+  `).join('');
+}
+
+function setThemeColor(val) {
+  STATE.themeColor = val;
+  db.ref('/themeColor').set(val);
+  applyTheme();
+  renderColorSwatches();
+}
+
+// ===== UTILS =====
+function fmt(n) { return '¥'+Number(n).toLocaleString('ja-JP'); }
+function dateStr(ts) {
+  const d=new Date(ts);
+  return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function calcDanPoints() {
+  const pts={};
+  Object.values(STATE.transactions||{}).forEach(t=>{
+    if(t.type==='charge'&&t.bonus>0) pts[t.customerId]=(pts[t.customerId]||0)+t.bonus;
+  });
+  return pts;
+}
+
+// ===== SCREEN =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ===== TOAST =====
+let toastTimer;
+function toast(msg) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2400);
+}
+
+// ===== MODAL =====
+function showModal(html) { document.getElementById('modal-box').innerHTML=html; document.getElementById('modal-overlay').classList.add('show'); }
+function hideModal() { document.getElementById('modal-overlay').classList.remove('show'); }
+document.addEventListener('click',e=>{ if(e.target===document.getElementById('modal-overlay')) hideModal(); });
+
+// ===== OWNER PIN =====
+function goOwnerPin() {
+  ownerPinBuffer='';
+  renderPinKeypad('owner-pin-keypad','ownerPinInput','ownerPinDel');
+  updatePinDots('owner-pin-dots',0);
+  showScreen('owner-pin');
+}
+function ownerPinInput(v) {
+  if(ownerPinBuffer.length>=4) return;
+  ownerPinBuffer+=v;
+  updatePinDots('owner-pin-dots',ownerPinBuffer.length);
+  if(ownerPinBuffer.length===4) setTimeout(checkOwnerPin,200);
+}
+function ownerPinDel() { ownerPinBuffer=ownerPinBuffer.slice(0,-1); updatePinDots('owner-pin-dots',ownerPinBuffer.length); }
+function checkOwnerPin() {
+  if(ownerPinBuffer==='9876') { initGame(); showScreen('secret-game'); }
+  else if(ownerPinBuffer===STATE.pin) { showScreen('owner-home'); renderOwnerHome(); }
+  else { ownerPinBuffer=''; updatePinDots('owner-pin-dots',0); toast('PIN ERROR'); }
+}
+
+// ===== SKATE GAME =====
+const SK = {
+  canvas: null, ctx: null,
+  W: 0, H: 0,
+  running: false, over: false,
+  score: 0, best: 0,
+  frame: 0, speed: 4,
+  raf: null,
+
+  // スケーター
+  sk: { x: 60, y: 0, vy: 0, onGround: true, w: 24, h: 28 },
+
+  // 地面（坂）
+  groundY: 0,
+  hillOffset: 0,
+
+  // 障害物
+  obstacles: [],
+  obsCooldown: 0,
+
+  // パーティクル
+  particles: [],
+
+  init() {
+    this.canvas = document.getElementById('skate-canvas');
+    if(!this.canvas) return;
+    this.W = this.canvas.clientWidth || window.innerWidth;
+    this.H = 200;
+    this.canvas.width = this.W;
+    this.canvas.height = this.H;
+    this.ctx = this.canvas.getContext('2d');
+    this.reset();
+    this.running = true;
+    this.loop();
+  },
+
+  reset() {
+    this.over = false;
+    this.score = 0;
+    this.frame = 0;
+    this.speed = 4;
+    this.hillOffset = 0;
+    this.obstacles = [];
+    this.obsCooldown = 80;
+    this.particles = [];
+    this.groundY = this.H * 0.72;
+    this.sk.y = this.groundY - this.sk.h;
+    this.sk.vy = 0;
+    this.sk.onGround = true;
+  },
+
+  getGroundAt(x) {
+    // 坂の起伏をsin波で表現
+    const wave1 = Math.sin((x + this.hillOffset) * 0.018) * 18;
+    const wave2 = Math.sin((x + this.hillOffset) * 0.042) * 8;
+    return this.groundY + wave1 + wave2;
+  },
+
+  jump() {
+    if(this.over) { this.reset(); document.getElementById('sk-tap-hint').textContent='TAP TO JUMP'; return; }
+    if(this.sk.onGround) {
+      this.sk.vy = -13;
+      this.sk.onGround = false;
+      // ジャンプパーティクル
+      for(let i=0;i<6;i++) this.particles.push({
+        x: this.sk.x, y: this.sk.y + this.sk.h,
+        vx: (Math.random()-0.5)*3, vy: Math.random()*-2,
+        life: 20, color: '#c8860a'
+      });
+    }
+  },
+
+  update() {
+    if(this.over) return;
+    this.frame++;
+    this.hillOffset += this.speed;
+
+    // スピードアップ（50点ごと）
+    this.speed = 4 + Math.floor(this.score / 50) * 0.8;
+    if(this.speed > 14) this.speed = 14;
+
+    // スケーター物理
+    const gY = this.getGroundAt(this.sk.x) - this.sk.h;
+    if(this.sk.onGround) {
+      this.sk.y = gY;
+    } else {
+      this.sk.vy += 0.7; // 重力
+      this.sk.y += this.sk.vy;
+      if(this.sk.y >= gY) {
+        this.sk.y = gY;
+        this.sk.vy = 0;
+        this.sk.onGround = true;
+      }
+    }
+
+    // 障害物生成
+    this.obsCooldown--;
+    if(this.obsCooldown <= 0) {
+      const h = 20 + Math.random() * 20;
+      const ox = this.W + 20;
+      const oy = this.getGroundAt(ox) - h;
+      this.obstacles.push({ x: ox, y: oy, w: 14, h });
+      // インターバルをスピードに応じて短く
+      this.obsCooldown = Math.max(40, 100 - this.score * 0.3);
+    }
+
+    // 障害物移動・スコア・当たり判定
+    this.obstacles = this.obstacles.filter(o => {
+      o.x -= this.speed;
+      o.y = this.getGroundAt(o.x) - o.h;
+
+      // スコア（通過したら+1）
+      if(!o.passed && o.x + o.w < this.sk.x) {
+        o.passed = true;
+        this.score++;
+        if(this.score > this.best) this.best = this.score;
+        // 通過パーティクル
+        for(let i=0;i<8;i++) this.particles.push({
+          x: this.sk.x + this.sk.w/2, y: this.sk.y,
+          vx: (Math.random()-0.5)*4, vy: Math.random()*-3-1,
+          life: 25, color: '#f5c84a'
+        });
+      }
+
+      // 当たり判定
+      const margin = 4;
+      if(this.sk.x + this.sk.w - margin > o.x + margin &&
+         this.sk.x + margin < o.x + o.w - margin &&
+         this.sk.y + this.sk.h - margin > o.y + margin) {
+        this.gameOver();
+      }
+      return o.x > -50;
+    });
+
+    // パーティクル更新
+    this.particles = this.particles.filter(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life--;
+      return p.life > 0;
+    });
+
+    // UI更新
+    document.getElementById('sk-score').textContent = this.score;
+    document.getElementById('sk-best').textContent = this.best;
+    document.getElementById('sk-score-disp').textContent = this.score;
+    const lvl = Math.floor(this.score / 50) + 1;
+    document.getElementById('sk-speed').textContent = lvl + 'x';
+  },
+
+  draw() {
+    const c = this.ctx;
+    c.clearRect(0, 0, this.W, this.H);
+
+    // 背景グラデーション（夜の街）
+    const grad = c.createLinearGradient(0, 0, 0, this.H);
+    grad.addColorStop(0, '#080810');
+    grad.addColorStop(1, '#101020');
+    c.fillStyle = grad;
+    c.fillRect(0, 0, this.W, this.H);
+
+    // 星
+    if(this.frame % 3 === 0) this._drawStars(c);
+
+    // 地面の坂
+    c.beginPath();
+    c.moveTo(0, this.H);
+    for(let x=0; x<=this.W; x+=4) {
+      c.lineTo(x, this.getGroundAt(x));
+    }
+    c.lineTo(this.W, this.H);
+    c.closePath();
+    c.fillStyle = '#1a1a2e';
+    c.fill();
+
+    // 地面ライン
+    c.beginPath();
+    for(let x=0; x<=this.W; x+=4) {
+      if(x===0) c.moveTo(x, this.getGroundAt(x));
+      else c.lineTo(x, this.getGroundAt(x));
+    }
+    c.strokeStyle = '#c8860a';
+    c.lineWidth = 2;
+    c.stroke();
+
+    // パーティクル
+    this.particles.forEach(p => {
+      c.globalAlpha = p.life / 25;
+      c.fillStyle = p.color;
+      c.fillRect(p.x-2, p.y-2, 4, 4);
+    });
+    c.globalAlpha = 1;
+
+    // 障害物（コーン風）
+    this.obstacles.forEach(o => {
+      c.fillStyle = '#e8a82a';
+      c.beginPath();
+      c.moveTo(o.x + o.w/2, o.y);
+      c.lineTo(o.x + o.w, o.y + o.h);
+      c.lineTo(o.x, o.y + o.h);
+      c.closePath();
+      c.fill();
+      c.fillStyle = '#fff';
+      c.fillRect(o.x + 2, o.y + o.h * 0.4, o.w - 4, 3);
+    });
+
+    // スケーター
+    const sx = this.sk.x, sy = this.sk.y;
+    const sw = this.sk.w, sh = this.sk.h;
+
+    // ボード
+    c.fillStyle = '#c8860a';
+    c.fillRect(sx - 4, sy + sh - 5, sw + 8, 5);
+    c.fillStyle = '#333';
+    c.beginPath(); c.arc(sx, sy+sh, 5, 0, Math.PI*2); c.fill();
+    c.beginPath(); c.arc(sx+sw, sy+sh, 5, 0, Math.PI*2); c.fill();
+
+    // 体
+    c.fillStyle = '#f0ece4';
+    c.fillRect(sx + 4, sy + 4, sw - 8, sh - 10);
+
+    // 頭
+    c.fillStyle = '#f0ece4';
+    c.beginPath(); c.arc(sx + sw/2, sy + 4, 7, 0, Math.PI*2); c.fill();
+
+    // ヘルメット
+    c.fillStyle = '#c8860a';
+    c.beginPath(); c.arc(sx + sw/2, sy + 3, 7, Math.PI, 0); c.fill();
+
+    // ゲームオーバー表示
+    if(this.over) {
+      c.fillStyle = 'rgba(0,0,0,0.7)';
+      c.fillRect(0, 0, this.W, this.H);
+      c.fillStyle = '#e07060';
+      c.font = "bold 28px 'Bebas Neue', sans-serif";
+      c.textAlign = 'center';
+      c.fillText('GAME OVER', this.W/2, this.H/2 - 16);
+      c.fillStyle = '#f0ece4';
+      c.font = "16px 'DM Mono', monospace";
+      c.fillText('SCORE: ' + this.score, this.W/2, this.H/2 + 10);
+      c.fillStyle = '#c8860a';
+      c.font = "13px 'Bebas Neue', sans-serif";
+      c.fillText('TAP TO RETRY', this.W/2, this.H/2 + 34);
+    }
+  },
+
+  _stars: [],
+  _drawStars(c) {
+    if(this._stars.length === 0) {
+      for(let i=0;i<30;i++) this._stars.push({x:Math.random()*400,y:Math.random()*80});
+    }
+    c.fillStyle = 'rgba(255,255,255,0.4)';
+    this._stars.forEach(s => { c.fillRect((s.x - this.hillOffset*0.02)%this.W, s.y, 1.5, 1.5); });
+  },
+
+  gameOver() {
+    this.over = true;
+    document.getElementById('sk-tap-hint').textContent = 'TAP TO RETRY';
+  },
+
+  loop() {
+    if(!this.running) return;
+    this.update();
+    this.draw();
+    this.raf = requestAnimationFrame(() => this.loop());
+  },
+
+  stop() {
+    this.running = false;
+    if(this.raf) cancelAnimationFrame(this.raf);
+  }
+};
+
+function initGame() {
+  // 画面遷移後にcanvasサイズが確定してから初期化
+  setTimeout(() => { SK.init(); }, 100);
+}
+function skateJump() { SK.jump(); }
+function skateExit() { SK.stop(); showScreen('home'); }
+
+// ===== CUSTOMER PIN =====
+function goCustomerPin(id) {
+  currentCustomerId=id; window._currentCustomerId=id;
+  customerPinBuffer='';
+  const c=STATE.customers[id];
+  document.getElementById('customer-pin-title').textContent=c.name.toUpperCase();
+  renderPinKeypad('customer-pin-keypad','customerPinInput','customerPinDel');
+  updatePinDots('customer-pin-dots',0);
+  showScreen('customer-pin');
+}
+function customerPinInput(v) {
+  if(customerPinBuffer.length>=4) return;
+  customerPinBuffer+=v;
+  updatePinDots('customer-pin-dots',customerPinBuffer.length);
+  if(customerPinBuffer.length===4) setTimeout(checkCustomerPin,200);
+}
+function customerPinDel() { customerPinBuffer=customerPinBuffer.slice(0,-1); updatePinDots('customer-pin-dots',customerPinBuffer.length); }
+function checkCustomerPin() {
+  const c=STATE.customers[currentCustomerId];
+  if(customerPinBuffer===(c.pin||'0000')) { goWallet(currentCustomerId); }
+  else { customerPinBuffer=''; updatePinDots('customer-pin-dots',0); toast('PIN ERROR'); }
+}
+
+// ===== PIN HELPERS =====
+function renderPinKeypad(cid,inputFn,delFn) {
+  const keys=['1','2','3','4','5','6','7','8','9','','0','⌫'];
+  document.getElementById(cid).innerHTML=keys.map(k=>{
+    if(k==='') return `<div class="pin-key empty"></div>`;
+    if(k==='⌫') return `<button class="pin-key del" onclick="${delFn}()">⌫</button>`;
+    return `<button class="pin-key" onclick="${inputFn}('${k}')">${k}</button>`;
+  }).join('');
+}
+function updatePinDots(dotsId,len) {
+  document.querySelectorAll(`#${dotsId} .pin-dot`).forEach((d,i)=>d.classList.toggle('filled',i<len));
+}
+
+// ===== OWNER HOME =====
+function renderOwnerHome() {
+  document.getElementById('store-name-input').value=STATE.storeName||'';
+  document.getElementById('store-addr-input').value=STATE.storeAddr||'';
+  document.getElementById('store-copy-input').value=STATE.storeCopy||'';
+  document.getElementById('pin-input').value=STATE.pin||'0000';
+  document.getElementById('premium-input').value=STATE.premium||'';
+  updatePremiumPreview();
+  renderColorSwatches();
+
+  const txArr=Object.values(STATE.transactions||{});
+  const today=new Date().toDateString();
+  const todayTx=txArr.filter(t=>new Date(t.ts).toDateString()===today);
+  const todaySales=todayTx.filter(t=>t.type==='pay').reduce((s,t)=>s+t.amount,0);
+  const todayCharge=todayTx.filter(t=>t.type==='charge').reduce((s,t)=>s+t.amount,0);
+  const totalSales=txArr.filter(t=>t.type==='pay').reduce((s,t)=>s+t.amount,0);
+  const totalCharge=txArr.filter(t=>t.type==='charge').reduce((s,t)=>s+t.amount,0);
+
+  document.getElementById('owner-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">本日の売上</div><div class="stat-value" style="color:#4aaa7a">${fmt(todaySales)}</div></div>
+    <div class="stat-card"><div class="stat-label">本日のチャージ</div><div class="stat-value" style="color:var(--accent)">${fmt(todayCharge)}</div></div>
+    <div class="stat-card"><div class="stat-label">累計売上</div><div class="stat-value" style="color:#4aaa7a">${fmt(totalSales)}</div></div>
+    <div class="stat-card"><div class="stat-label">累計チャージ</div><div class="stat-value" style="color:var(--accent)">${fmt(totalCharge)}</div></div>
+  `;
+
+  const customers=Object.entries(STATE.customers||{});
+  const list=document.getElementById('owner-customer-list');
+  if(customers.length===0){ list.innerHTML=`<div class="empty-state"><div class="icon">👤</div><p>メンバーがいません</p></div>`; return; }
+  const pts=calcDanPoints();
+  list.innerHTML=customers.map(([id,c])=>`
+    <div class="customer-item" onclick="goOwnerDetail('${id}')">
+      <div class="customer-avatar">${c.name.charAt(0)}</div>
+      <div class="customer-info">
+        <div class="customer-name">${c.name}</div>
+        <div class="customer-sub">${fmt(c.balance||0)} &nbsp;·&nbsp; ${pts[id]||0} PTS</div>
+      </div>
+      <div class="customer-arrow">›</div>
+    </div>
+  `).join('');
+}
+
+function saveStoreName(v) { STATE.storeName=v; db.ref('/storeName').set(v); updateHomeText(); }
+function saveStoreAddr(v) { STATE.storeAddr=v; db.ref('/storeAddr').set(v); updateHomeText(); }
+function saveStoreCopy(v) { STATE.storeCopy=v; db.ref('/storeCopy').set(v); updateHomeText(); }
+function savePin(v) { if(v.length<=4){STATE.pin=v; db.ref('/pin').set(v);} }
+function savePremium(v) { const p=parseFloat(v)||0; STATE.premium=p; db.ref('/premium').set(p); updatePremiumPreview(); }
+function updatePremiumPreview() {
+  const el=document.getElementById('premium-preview'); if(!el) return;
+  const p=STATE.premium||0;
+  if(p<=0){el.textContent='プレミアムなし — ボーナスポイント: 0';return;}
+  const ex=Math.floor(5000*(1+p/100)), pts=Math.floor(5000*p/100);
+  el.textContent=`¥5,000 チャージ → ¥${ex.toLocaleString()} / +${pts} PTS`;
+}
+
+// ===== ADD MEMBER =====
+function showAddCustomer() {
+  if(Object.keys(STATE.customers||{}).length>=10){toast('最大10名まで');return;}
+  showModal(`
+    <div class="modal-title">NEW MEMBER</div>
+    <div class="modal-body">
+      <div class="form-group"><div class="form-label">名前</div><input class="form-input form-input-text" id="new-name" placeholder="山田 太郎"></div>
+      <div class="form-group"><div class="form-label">個別PIN（4桁）</div><input class="form-input" type="number" id="new-pin" placeholder="0000"></div>
+      <button class="btn btn-primary" onclick="addCustomer()">追加する</button>
+      <button class="btn btn-secondary" onclick="hideModal()">キャンセル</button>
+    </div>
+  `);
+}
+function addCustomer() {
+  const name=document.getElementById('new-name').value.trim();
+  const pin=document.getElementById('new-pin').value.trim()||'0000';
+  if(!name){toast('名前を入力してください');return;}
+  db.ref('/customers').push({name,pin,balance:0});
+  hideModal(); toast(name+' を追加しました');
+}
+
+// ===== MEMBER PIN CHANGE =====
+function saveMemberPin() {
+  const val = document.getElementById('member-pin-input').value.trim();
+  if (!val || val.length < 4) { toast('4桁のPINを入力してください'); return; }
+  db.ref(`/customers/${currentCustomerId}`).update({ pin: val });
+  document.getElementById('member-pin-input').value = '';
+  toast('PINを変更しました');
+}
+
+// ===== OWNER DETAIL =====
+function goOwnerDetail(id) {
+  currentCustomerId=id; window._currentCustomerId=id;
+  refreshDetail(); showScreen('owner-customer-detail');
+}
+function refreshDetail() {
+  if(!currentCustomerId) return;
+  const c=STATE.customers[currentCustomerId]; if(!c) return;
+  document.getElementById('detail-customer-name').textContent=c.name;
+  document.getElementById('detail-balance-amount').innerHTML=`<span>¥</span>${(c.balance||0).toLocaleString()}`;
+  document.getElementById('detail-balance-name').textContent=c.name;
+  const pinEl=document.getElementById('member-pin-input');
+  if(pinEl) pinEl.value='';
+  renderDetailTx(currentCustomerId);
+}
+function renderDetailTx(id) {
+  const txs=Object.values(STATE.transactions||{}).filter(t=>t.customerId===id).sort((a,b)=>b.ts-a.ts).slice(0,30);
+  const el=document.getElementById('detail-tx-list');
+  if(txs.length===0){el.innerHTML=`<div class="empty-state" style="padding:24px"><p>履歴なし</p></div>`;return;}
+  el.innerHTML=txs.map(t=>`
+    <div class="tx-item">
+      <div class="tx-icon ${t.type}">${t.type==='charge'?'↑':'↓'}</div>
+      <div class="tx-info"><div class="tx-title">${t.type==='charge'?'チャージ':'お支払い'}</div><div class="tx-date">${dateStr(t.ts)}</div></div>
+      <div>
+        <div class="tx-amount ${t.type}">${t.type==='charge'?'+':'-'}${fmt(t.amount)}</div>
+        ${t.type==='charge'&&t.bonus>0?`<div style="font-size:10px;color:var(--accent);text-align:right;font-family:'Bebas Neue',sans-serif">+${t.bonus} PTS</div>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateChargePreview(v){
+  const el=document.getElementById('charge-preview');
+  if(!el) return;
+  const amount=parseInt(v);
+  if(!amount||amount<=0){el.style.display='none';return;}
+  const premium=parseFloat(STATE.premium)||0;
+  const bonus=Math.floor(amount*premium/100);
+  const credited=amount+bonus;
+  const paypayFee=Math.ceil(amount*0.016);
+  let text=`現金: ${fmt(credited)}`;
+  if(bonus>0) text+=`（+${bonus} PTS）`;
+  text+=` / PayPay: 手数料 -${fmt(paypayFee)}`;
+  el.textContent=text;
+  el.style.display='block';
+}
+function setChargeAmount(v){
+  document.getElementById('charge-amount').value=v;
+  updateChargePreview(v);
+}
+function doCharge(method) {
+  const amount=parseInt(document.getElementById('charge-amount').value);
+  if(!amount||amount<=0){toast('金額を入力してください');return;}
+  const c=STATE.customers[currentCustomerId];
+  // Firebaseから最新のpremiumを直接取得して計算
+  const premium = parseFloat(STATE.premium) || 0;
+  const bonus=Math.floor(amount*premium/100);
+  const credited=amount+bonus;
+  const paypayFee=method==='paypay'?Math.ceil(amount*0.016):0;
+
+  // PayPayの場合は確認モーダルを表示
+  if(method==='paypay'){
+    showModal(`
+      <div class="modal-title">PayPay チャージ確認</div>
+      <div class="modal-body">
+        <div style="background:var(--dark3);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:12px;color:var(--gray);letter-spacing:.06em">受取金額</span>
+            <span style="font-family:'DM Mono',monospace;font-size:18px">${fmt(amount)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:12px;color:#e00;letter-spacing:.06em">PayPay手数料 (1.6%)</span>
+            <span style="font-family:'DM Mono',monospace;font-size:16px;color:#e00">-${fmt(paypayFee)}</span>
+          </div>
+          ${bonus>0?`<div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:12px;color:var(--accent);letter-spacing:.06em">プレミアムボーナス</span>
+            <span style="font-family:'DM Mono',monospace;font-size:16px;color:var(--accent)">+${fmt(bonus)}</span>
+          </div>`:''}
+          <div style="height:1px;background:var(--border)"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;font-weight:700;letter-spacing:.06em">チャージ額</span>
+            <span style="font-family:'DM Mono',monospace;font-size:22px;color:var(--accent)">${fmt(credited)}</span>
+          </div>
+          ${bonus>0?`<div style="font-size:11px;color:var(--gray);text-align:center;letter-spacing:.06em">手数料 ${fmt(paypayFee)} を上回るボーナス ${fmt(bonus)} が付きます</div>`:`<div style="font-size:11px;color:var(--gray);text-align:center">プレミアムを設定するとPayPay手数料をボーナスで補えます</div>`}
+        </div>
+        <button class="btn btn-primary" onclick="confirmCharge(${amount},${bonus},${credited},'paypay')">チャージ確定</button>
+        <button class="btn btn-secondary" onclick="hideModal()">キャンセル</button>
+      </div>
+    `);
+    return;
+  }
+  confirmCharge(amount,bonus,credited,'cash');
+}
+
+function confirmCharge(amount,bonus,credited,method){
+  const c=STATE.customers[currentCustomerId];
+  db.ref(`/customers/${currentCustomerId}`).update({balance:(c.balance||0)+credited});
+  db.ref('/transactions').push({customerId:currentCustomerId,type:'charge',amount:credited,paid:amount,bonus,method,ts:Date.now()});
+  document.getElementById('charge-amount').value='';
+  document.getElementById('charge-preview').style.display='none';
+  hideModal();
+  const methodLabel=method==='paypay'?' (PayPay)':'';
+  toast(bonus>0?`${fmt(credited)} チャージ${methodLabel} +${bonus} PTS`:`${fmt(credited)} チャージしました${methodLabel}`);
+}
+
+// ===== DELETE =====
+function showDeleteCustomer() {
+  const c=STATE.customers[currentCustomerId];
+  showModal(`
+    <div class="modal-title">削除しますか？</div>
+    <div class="modal-body">
+      <div style="text-align:center;padding:8px;color:var(--gray);font-size:13px;line-height:1.9">${c.name} のデータと<br>全履歴が削除されます</div>
+      <button class="btn btn-danger" onclick="deleteCustomer()">削除する</button>
+      <button class="btn btn-secondary" onclick="hideModal()">キャンセル</button>
+    </div>
+  `);
+}
+function deleteCustomer() {
+  const c=STATE.customers[currentCustomerId];
+  db.ref(`/customers/${currentCustomerId}`).remove();
+  Object.entries(STATE.transactions||{}).filter(([,t])=>t.customerId===currentCustomerId).forEach(([id])=>db.ref(`/transactions/${id}`).remove());
+  hideModal(); showScreen('owner-home'); toast(c.name+' を削除しました');
+}
+
+// ===== CUSTOMER SELECT =====
+function goCustomerSelect(){renderCustomerSelect();showScreen('customer-select');}
+function renderCustomerSelect() {
+  const customers=Object.entries(STATE.customers||{});
+  const list=document.getElementById('customer-select-list');
+  if(customers.length===0){list.innerHTML=`<div class="empty-state"><div class="icon">🍸</div><p>メンバー未登録<br>店主にお声がけください</p></div>`;return;}
+  list.innerHTML=customers.map(([id,c])=>`
+    <div class="customer-item" onclick="goCustomerPin('${id}')">
+      <div class="customer-avatar">${c.name.charAt(0)}</div>
+      <div class="customer-info">
+        <div class="customer-name">${c.name}</div>
+        <div class="customer-sub">PINでログイン</div>
+      </div>
+      <div class="customer-arrow">›</div>
+    </div>
+  `).join('');
+}
+
+// ===== BONUS RANKING =====
+function renderDanRanking(myId) {
+  const pts=calcDanPoints();
+  const ranked=Object.entries(STATE.customers||{})
+    .map(([id,c])=>({id,name:c.name,pts:pts[id]||0}))
+    .sort((a,b)=>b.pts-a.pts);
+  const maxPts=ranked[0]?.pts||1;
+  const rankCls=['gold','silver','bronze'];
+  const rankMark=['👑','🥈','🥉'];
+  const el=document.getElementById('dan-ranking'); if(!el) return;
+  if(ranked.every(r=>r.pts===0)){
+    el.innerHTML=`<div class="ranking-header"><div class="ranking-header-title">ボーナスポイント</div><div class="ranking-header-sub">チャージするとポイントが貯まります</div></div><div style="padding:24px;text-align:center;color:var(--gray);font-size:11px;letter-spacing:.1em">まだポイントがありません</div>`;
+    return;
+  }
+  el.innerHTML=`
+    <div class="ranking-header"><div class="ranking-header-title">ボーナスポイント RANKING</div><div class="ranking-header-sub">チャージボーナスの累計</div></div>
+    ${ranked.map((r,i)=>`
+      <div class="ranking-item ${r.id===myId?'me':''}">
+        <div class="ranking-rank ${rankCls[i]||''}">${i<3?rankMark[i]:i+1}</div>
+        <div class="ranking-avatar">${r.name.charAt(0)}</div>
+        <div style="flex:1">
+          <div class="ranking-name">${r.name}${r.id===myId?' <span style="font-size:10px;color:var(--accent);font-family:\'DM Mono\',monospace">YOU</span>':''}</div>
+          <div class="ranking-bar-wrap"><div class="ranking-bar" style="width:${maxPts>0?Math.round(r.pts/maxPts*100):0}%"></div></div>
+        </div>
+        <div class="ranking-pts"><div class="ranking-pts-val">${r.pts.toLocaleString()}</div><div class="ranking-pts-label">PTS</div></div>
+      </div>
+    `).join('')}
+  `;
+}
+
+// ===== CUSTOMER WALLET =====
+function goWallet(id){currentCustomerId=id;refreshWallet();showScreen('customer-wallet');}
+function refreshWallet() {
+  if(!currentCustomerId) return;
+  const c=STATE.customers[currentCustomerId]; if(!c) return;
+  document.getElementById('wallet-customer-name').textContent=c.name;
+  document.getElementById('wallet-balance').innerHTML=`<span>¥</span>${(c.balance||0).toLocaleString()}`;
+  document.getElementById('wallet-name-label').textContent=c.name;
+  renderDanRanking(currentCustomerId);
+  const txs=Object.values(STATE.transactions||{}).filter(t=>t.customerId===currentCustomerId).sort((a,b)=>b.ts-a.ts).slice(0,30);
+  const el=document.getElementById('wallet-tx-list');
+  if(txs.length===0){el.innerHTML=`<div class="empty-state" style="padding:24px"><p>履歴なし</p></div>`;return;}
+  el.innerHTML=txs.map(t=>`
+    <div class="tx-item">
+      <div class="tx-icon ${t.type}">${t.type==='charge'?'↑':'↓'}</div>
+      <div class="tx-info"><div class="tx-title">${t.type==='charge'?'チャージ':'お支払い'}</div><div class="tx-date">${dateStr(t.ts)}</div></div>
+      <div>
+        <div class="tx-amount ${t.type}">${t.type==='charge'?'+':'-'}${fmt(t.amount)}</div>
+        ${t.type==='charge'&&t.bonus>0?`<div style="font-size:10px;color:var(--accent);text-align:right;font-family:'Bebas Neue',sans-serif">+${t.bonus} PTS</div>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== PAY INPUT =====
+function goPayInput(id) {
+  if(!id){toast('エラー: メンバーが選択されていません');return;}
+  currentCustomerId=id; window._currentCustomerId=id;
+  const c=STATE.customers[id];
+  document.getElementById('pay-input-name').textContent=c.name+' — 請求';
+  document.getElementById('pay-input-balance').innerHTML=`<span>¥</span>${(c.balance||0).toLocaleString()}`;
+  document.getElementById('pay-input-balance-name').textContent=c.name;
+  document.getElementById('pay-amount').value='';
+  showScreen('pay-input');
+}
+function goPayConfirm() {
+  const amount=parseInt(document.getElementById('pay-amount').value);
+  if(!amount||amount<=0){toast('金額を入力してください');return;}
+  const c=STATE.customers[currentCustomerId];
+  if((c.balance||0)<amount){toast('残高が足りません');return;}
+  pendingPayAmount=amount;
+  document.getElementById('confirm-amount-display').textContent=fmt(amount);
+  document.getElementById('confirm-name-display').textContent=c.name+' さん';
+  document.getElementById('confirm-after-balance').textContent=fmt((c.balance||0)-amount);
+  // PAYボタンにイベントを直接設定（確実に動作させる）
+  const payBtn=document.getElementById('pay-execute-btn');
+  payBtn.onclick=null;
+  payBtn.onclick=function(){ executePay(); };
+  showScreen('pay-confirm');
+}
+function executePay() {
+  const amount=pendingPayAmount;
+  if(!amount||amount<=0){showScreen('pay-input');return;}
+  const c=STATE.customers[currentCustomerId];
+  if((c.balance||0)<amount){toast('残高が足りません');showScreen('pay-input');return;}
+  db.ref(`/customers/${currentCustomerId}`).update({balance:(c.balance||0)-amount});
+  db.ref('/transactions').push({customerId:currentCustomerId,type:'pay',amount,ts:Date.now()});
+  pendingPayAmount=0;
+  showScreen('owner-customer-detail');
+  toast(fmt(amount)+' の支払いを受け付けました');
+}
+</script>
+</body>
+</html>
