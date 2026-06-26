@@ -1322,11 +1322,16 @@ function updatePinDots(dotsId,len) {
 
 // ===== OWNER HOME =====
 function renderOwnerHome() {
-  document.getElementById('store-name-input').value=STATE.storeName||'';
-  document.getElementById('store-addr-input').value=STATE.storeAddr||'';
-  document.getElementById('store-copy-input').value=STATE.storeCopy||'';
-  document.getElementById('pin-input').value=STATE.pin||'0000';
-  document.getElementById('premium-input').value=STATE.premium||'';
+  const focused = document.activeElement;
+  const setIfNotFocused = (id, val) => {
+    const el = document.getElementById(id);
+    if (el && el !== focused) el.value = val;
+  };
+  setIfNotFocused('store-name-input', STATE.storeName||'');
+  setIfNotFocused('store-addr-input', STATE.storeAddr||'');
+  setIfNotFocused('store-copy-input', STATE.storeCopy||'');
+  setIfNotFocused('pin-input', STATE.pin||'0000');
+  setIfNotFocused('premium-input', STATE.premium||'');
   updatePremiumPreview();
   renderColorSwatches();
 
@@ -1640,3 +1645,4 @@ function executePay() {
 </script>
 </body>
 </html>
+
