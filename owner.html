@@ -721,32 +721,30 @@ function execCheckout(){
     (allOrders[id].items||[]).forEach(it=>total+=it.price*it.qty);
   });
   const seat=currentModalSeat;
-  let completed=0;
-  let failed=0;
-  const writeDb=firebase.database();
-  // 1件ずつ個別に更新
-  targetIds.forEach(id=>{
-    writeDb.ref('/orders/'+id+'/status').set('paid', function(error){
+  const firstId=targetIds[0];
+  // まず接続確認
+  toast('⏳ 書き込み中...');
+  firebase.database().ref('/.info/connected').once('value', function(snap){
+    const connected=snap.val();
+    if(!connected){
+      toast('❌ Firebase未接続 — ネット接続を確認してください');
+      return;
+    }
+    // 接続OK → 書き込み
+    firebase.database().ref('/orders/'+firstId+'/status').set('paid', function(error){
       if(error){
-        failed++;
-        toast('❌ 失敗: '+(error.message||error));
+        toast('❌ 書き込み失敗: '+(error.message||JSON.stringify(error)));
       } else {
-        completed++;
-        if(completed+failed===targetIds.length){
-          if(failed===0){
-            toast('✅ '+seat+' 会計完了 ¥'+total.toLocaleString());
-            closeSeatModal();
-          }
-        }
+        // 残りも更新
+        let done=1;
+        targetIds.slice(1).forEach(id=>{
+          firebase.database().ref('/orders/'+id+'/status').set('paid', function(){done++;});
+        });
+        toast('✅ '+seat+' 会計完了 ¥'+total.toLocaleString());
+        closeSeatModal();
       }
     });
   });
-  // 10秒で強制タイムアウト
-  setTimeout(function(){
-    if(completed+failed<targetIds.length){
-      toast('⚠ タイムアウト — ページを再読み込みしてください');
-    }
-  },10000);
 }
 
 // ===== モーダル =====
