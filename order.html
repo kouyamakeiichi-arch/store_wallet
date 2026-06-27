@@ -196,7 +196,33 @@ header{
 }
 .seat-selected-disp.show{display:block}
 
-/* ===== SCROLLBAR ===== */ */
+/* ===== RESET MODAL ===== */
+.reset-modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;
+  display:none;align-items:center;justify-content:center
+}
+.reset-modal-bg.show{display:flex}
+.reset-modal{
+  background:#141414;border:1px solid rgba(200,162,48,.4);border-radius:12px;
+  padding:24px;width:min(320px,88vw);display:flex;flex-direction:column;gap:14px
+}
+.reset-modal h3{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.15em;color:#e8c050}
+.reset-modal p{font-size:13px;color:#6a6660;line-height:1.8}
+.reset-modal-btns{display:flex;gap:8px}
+.rm-btn{flex:1;padding:11px;border-radius:8px;border:none;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:'Noto Sans JP',sans-serif}
+.rm-ok{background:#c0392b;color:#fff}
+.rm-cancel{background:#1c1c1c;color:#6a6660;border:1px solid #2a2a2a}
+.owner-reset-btn{
+  position:fixed;bottom:20px;right:16px;z-index:50;
+  background:#1c1c1c;color:#6a6660;border:1px solid #2a2a2a;
+  border-radius:20px;padding:7px 14px;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:'Noto Sans JP',sans-serif;letter-spacing:.06em;
+  opacity:.6
+}
+.owner-reset-btn:active{opacity:1;border-color:rgba(192,57,43,.5);color:#e07060}
+
+/* ===== SCROLLBAR ===== */ */ */
 .cart-list::-webkit-scrollbar{width:3px}
 .cart-list::-webkit-scrollbar-thumb{background:var(--gray2);border-radius:2px}
 </style>
@@ -204,6 +230,21 @@ header{
 <body>
 
 <div id="toast"></div>
+
+<!-- 注文番号リセットモーダル（オーナー用） -->
+<div class="reset-modal-bg" id="reset-modal-bg">
+  <div class="reset-modal">
+    <h3>⚠ 注文番号をリセット</h3>
+    <p>注文番号を #1 からやり直します。<br>営業終了後・翌日の開店前に使用してください。</p>
+    <div class="reset-modal-btns">
+      <button class="rm-btn rm-cancel" onclick="closeResetModal()">キャンセル</button>
+      <button class="rm-btn rm-ok" onclick="execReset()">リセットする</button>
+    </div>
+  </div>
+</div>
+
+<!-- オーナー用リセットボタン（右下に小さく表示） -->
+<button class="owner-reset-btn" onclick="openResetModal()">⟳ 番号リセット</button>
 
 <!-- ヘッダー -->
 <header>
@@ -522,6 +563,23 @@ function toggleCart(){
 }
 
 // ===== 注文送信 =====
+// ===== 注文番号リセット（オーナー用） =====
+function openResetModal(){document.getElementById('reset-modal-bg').classList.add('show');}
+function closeResetModal(){document.getElementById('reset-modal-bg').classList.remove('show');}
+async function execReset(){
+  if(!db){toast('Firebase未接続');closeResetModal();return;}
+  try{
+    await db.ref('/orderCounter').set(0);
+    toast('✅ 注文番号を #1 にリセットしました');
+  }catch(e){
+    toast('❌ リセット失敗: '+e.message);
+  }
+  closeResetModal();
+}
+document.getElementById('reset-modal-bg').addEventListener('click',e=>{
+  if(e.target===document.getElementById('reset-modal-bg'))closeResetModal();
+});
+
 async function submitOrder(){
   if(!db){toast('接続中です。少し待ってから再度お試しください');return;}
   const items=Object.values(cart).filter(i=>i.qty>0);
