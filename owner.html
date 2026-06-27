@@ -669,30 +669,41 @@ function closeSeatModal(){
 // ===== 会計処理 =====
 async function checkoutSeat(){
   if(!currentModalSeat||!db){toast('エラー');return;}
-  const orders=seatOrdersCache[currentModalSeat]||[];
   const today=new Date().toDateString();
-  const targets=orders.filter(o=>
-    new Date(o.ts).toDateString()===today && o.status!=='paid'
-  );
-  if(targets.length===0){toast('会計済みです');closeSeatModal();return;}
 
-  // 合計を計算して確認
+  // allOrdersから直接席と今日の未会計注文のキーを取得
+  const targetIds=Object.entries(allOrders)
+    .filter(([,o])=>
+      o.seat===currentModalSeat &&
+      new Date(o.ts).toDateString()===today &&
+      o.status!=='paid'
+    ).map(([id])=>id);
+
+  if(targetIds.length===0){toast('会計済みです');closeSeatModal();return;}
+
+  // 合計計算
   let total=0;
-  targets.forEach(o=>(o.items||[]).forEach(it=>total+=it.price*it.qty));
+  targetIds.forEach(id=>{
+    (allOrders[id].items||[]).forEach(it=>total+=it.price*it.qty);
+  });
 
   if(!confirm(`🪑 ${currentModalSeat}\n合計 ¥${total.toLocaleString()}\n\n会計しますか？`))return;
 
   try{
-    // 全注文を「paid（会計済み）」に更新
+    // Firebaseのキーで直接更新
     const updates={};
-    targets.forEach(o=>{
-      // Firebaseのキーを取得
-      Object.entries(allOrders).forEach(([id,ord])=>{
-        if(ord.ts===o.ts&&ord.seat===o.seat){
-          updates[`/orders/${id}/status`]='paid';
-        }
-      });
+    targetIds.forEach(id=>{
+      updates[`/orders/${id}/status`]='paid';
     });
+    console.log('会計対象IDs:', targetIds);
+    console.log('updates:', updates);
+    console.log('allOrders keys:', Object.keys(allOrders));
+    if(Object.keys(updates).length===0){
+      toast('❌ 対象注文が見つかりません（席名不一致の可能性）');
+      console.log('currentModalSeat:', currentModalSeat);
+      console.log('allOrders seats:', Object.values(allOrders).map(o=>o.seat));
+      return;
+    }
     await db.ref().update(updates);
     toast(`✅ ${currentModalSeat} 会計完了 ¥${total.toLocaleString()}`);
     closeSeatModal();
