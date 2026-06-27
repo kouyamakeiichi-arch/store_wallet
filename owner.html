@@ -722,13 +722,19 @@ async function execCheckout(){
     const updates={};
     targetIds.forEach(id=>{updates[`/orders/${id}/status`]='paid';});
     console.log('会計実行 updates:', JSON.stringify(updates));
-    await db.ref().update(updates);
+    // タイムアウト付きでFirebaseに書き込み
+    const writePromise=db.ref().update(updates);
+    const timeoutPromise=new Promise((_,rej)=>setTimeout(()=>rej(new Error('タイムアウト(8秒)')),8000));
+    await Promise.race([writePromise,timeoutPromise]);
+    console.log('会計書き込み成功');
     toast(`✅ ${currentModalSeat} 会計完了 ¥${total.toLocaleString()}`);
     closeSeatModal();
   }catch(e){
     console.error('会計エラー詳細:', e.code, e.message);
-    if(e.code==='PERMISSION_DENIED'){
-      toast('❌ Firebase権限エラー — セキュリティルールを確認してください');
+    if(e.message&&e.message.includes('タイムアウト')){
+      toast('❌ Firebase接続タイムアウト — 接続状態を確認してください');
+    }else if(e.code==='PERMISSION_DENIED'){
+      toast('❌ Firebase権限エラー');
     }else{
       toast('❌ 会計失敗: '+e.message);
     }
