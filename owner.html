@@ -718,26 +718,26 @@ async function execCheckout(){
   targetIds.forEach(id=>{
     (allOrders[id].items||[]).forEach(it=>total+=it.price*it.qty);
   });
+  // 画面にデバッグ情報を表示
+  const dbg=document.getElementById('seat-modal-body');
+  const updates={};
+  targetIds.forEach(id=>{updates[`/orders/${id}/status`]='paid';});
+  dbg.innerHTML+=`<div style="font-size:10px;color:#888;margin-top:8px;word-break:break-all">
+    対象: ${JSON.stringify(targetIds)}<br>
+    席: ${currentModalSeat}<br>
+    DB接続: ${db?'あり':'なし'}
+  </div>`;
   try{
-    const updates={};
-    targetIds.forEach(id=>{updates[`/orders/${id}/status`]='paid';});
-    console.log('会計実行 updates:', JSON.stringify(updates));
-    // タイムアウト付きでFirebaseに書き込み
     const writePromise=db.ref().update(updates);
-    const timeoutPromise=new Promise((_,rej)=>setTimeout(()=>rej(new Error('タイムアウト(8秒)')),8000));
+    const timeoutPromise=new Promise((_,rej)=>setTimeout(()=>rej(new Error('タイムアウト8秒')),8000));
     await Promise.race([writePromise,timeoutPromise]);
-    console.log('会計書き込み成功');
     toast(`✅ ${currentModalSeat} 会計完了 ¥${total.toLocaleString()}`);
     closeSeatModal();
   }catch(e){
-    console.error('会計エラー詳細:', e.code, e.message);
-    if(e.message&&e.message.includes('タイムアウト')){
-      toast('❌ Firebase接続タイムアウト — 接続状態を確認してください');
-    }else if(e.code==='PERMISSION_DENIED'){
-      toast('❌ Firebase権限エラー');
-    }else{
-      toast('❌ 会計失敗: '+e.message);
-    }
+    dbg.innerHTML+=`<div style="font-size:11px;color:#e07060;margin-top:6px">
+      エラー: ${e.code||'?'} / ${e.message}
+    </div>`;
+    toast('❌ '+e.message);
   }
 }
 
