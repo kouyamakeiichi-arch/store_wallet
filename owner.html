@@ -710,7 +710,7 @@ function hideCheckoutConfirm(){
   document.getElementById('checkout-btn-wrap').style.display='block';
 }
 
-async function execCheckout(){
+function execCheckout(){
   if(!currentModalSeat||!db){toast('エラー');return;}
   const targetIds=getCheckoutTargetIds();
   if(targetIds.length===0){toast('会計済みです');closeSeatModal();return;}
@@ -718,27 +718,18 @@ async function execCheckout(){
   targetIds.forEach(id=>{
     (allOrders[id].items||[]).forEach(it=>total+=it.price*it.qty);
   });
-  // 画面にデバッグ情報を表示
-  const dbg=document.getElementById('seat-modal-body');
   const updates={};
   targetIds.forEach(id=>{updates[`/orders/${id}/status`]='paid';});
-  dbg.innerHTML+=`<div style="font-size:10px;color:#888;margin-top:8px;word-break:break-all">
-    対象: ${JSON.stringify(targetIds)}<br>
-    席: ${currentModalSeat}<br>
-    DB接続: ${db?'あり':'なし'}
-  </div>`;
-  try{
-    const writePromise=db.ref().update(updates);
-    const timeoutPromise=new Promise((_,rej)=>setTimeout(()=>rej(new Error('タイムアウト8秒')),8000));
-    await Promise.race([writePromise,timeoutPromise]);
-    toast(`✅ ${currentModalSeat} 会計完了 ¥${total.toLocaleString()}`);
-    closeSeatModal();
-  }catch(e){
-    dbg.innerHTML+=`<div style="font-size:11px;color:#e07060;margin-top:6px">
-      エラー: ${e.code||'?'} / ${e.message}
-    </div>`;
-    toast('❌ '+e.message);
-  }
+  const seat=currentModalSeat;
+  // コールバック方式で書き込み（awaitを使わない）
+  db.ref().update(updates, function(error){
+    if(error){
+      toast('❌ 会計失敗: '+(error.message||error));
+    } else {
+      toast(`✅ ${seat} 会計完了 ¥${total.toLocaleString()}`);
+      closeSeatModal();
+    }
+  });
 }
 
 // ===== モーダル =====
