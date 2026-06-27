@@ -53,7 +53,7 @@ header{
 .cat-tabs{
   display:flex;gap:0;overflow-x:auto;background:var(--dark2);
   border-bottom:1px solid var(--border);scrollbar-width:none;
-  position:sticky;top:90px;z-index:10
+  position:sticky;top:0;z-index:10
 }
 .cat-tabs::-webkit-scrollbar{display:none}
 .cat-tab{
@@ -175,7 +175,28 @@ header{
 }
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
-/* ===== SCROLLBAR ===== */
+/* ===== SEAT SELECTOR ===== */
+.seat-section{padding:14px 16px;background:var(--dark2);border-bottom:1px solid var(--border)}
+.seat-section-label{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.18em;margin-bottom:8px}
+.seat-group{margin-bottom:10px}
+.seat-group-name{font-size:10px;color:var(--gray);letter-spacing:.12em;margin-bottom:6px;font-weight:700}
+.seat-btns{display:flex;flex-wrap:wrap;gap:6px}
+.seat-btn{
+  padding:8px 14px;border-radius:7px;border:1.5px solid var(--border);
+  background:var(--dark3);color:var(--white);font-size:13px;font-weight:700;
+  cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s;letter-spacing:.06em
+}
+.seat-btn:active{transform:scale(.93)}
+.seat-btn.selected{background:var(--gold);color:var(--black);border-color:var(--gold)}
+.seat-selected-disp{
+  font-size:12px;color:var(--gold2);font-weight:700;
+  background:var(--gold-dim);border:1px solid var(--border2);
+  border-radius:6px;padding:5px 12px;display:none;margin-top:8px;
+  font-family:'DM Mono',monospace;letter-spacing:.06em
+}
+.seat-selected-disp.show{display:block}
+
+/* ===== SCROLLBAR ===== */ */
 .cart-list::-webkit-scrollbar{width:3px}
 .cart-list::-webkit-scrollbar-thumb{background:var(--gray2);border-radius:2px}
 </style>
@@ -192,11 +213,29 @@ header{
       🛒 CART <span class="cart-badge" id="cart-badge">0</span>
     </button>
   </div>
-  <div class="seat-row">
-    <label>席 / お名前</label>
-    <input type="text" id="seat-inp" placeholder="例：カウンター2番、田中" maxlength="20">
-  </div>
 </header>
+
+<!-- 席選択 -->
+<div class="seat-section">
+  <div class="seat-section-label">席を選んでください</div>
+  <div class="seat-group">
+    <div class="seat-group-name">COUNTER</div>
+    <div class="seat-btns" id="seat-counter"></div>
+  </div>
+  <div class="seat-group">
+    <div class="seat-group-name">TABLE A</div>
+    <div class="seat-btns" id="seat-ta"></div>
+  </div>
+  <div class="seat-group">
+    <div class="seat-group-name">TABLE B</div>
+    <div class="seat-btns" id="seat-tb"></div>
+  </div>
+  <div class="seat-group">
+    <div class="seat-group-name">TABLE C</div>
+    <div class="seat-btns" id="seat-tc"></div>
+  </div>
+  <div class="seat-selected-disp" id="seat-disp">未選択</div>
+</div>
 
 <!-- カテゴリタブ -->
 <div class="cat-tabs" id="cat-tabs"></div>
@@ -298,6 +337,34 @@ const MENU=[
 // ===== 状態 =====
 let cart={};
 let cartOpen=false;
+let selectedSeat='';
+
+// ===== 席選択 =====
+function buildSeats(){
+  // カウンター C1〜C7
+  const counter=document.getElementById('seat-counter');
+  counter.innerHTML=[1,2,3,4,5,6,7].map(n=>`
+    <button class="seat-btn" id="seat-C${n}" onclick="selectSeat('C${n}')">C${n}</button>`).join('');
+  // テーブルA B C 各6席
+  ['A','B','C'].forEach(t=>{
+    const el=document.getElementById('seat-t'+t.toLowerCase());
+    el.innerHTML=[1,2,3,4,5,6].map(n=>`
+      <button class="seat-btn" id="seat-${t}${n}" onclick="selectSeat('${t}-${n}')">${t}-${n}</button>`).join('');
+  });
+}
+
+function selectSeat(id){
+  // 全解除
+  document.querySelectorAll('.seat-btn').forEach(b=>b.classList.remove('selected'));
+  selectedSeat=id;
+  // 選択ボタンをハイライト
+  const btn=document.getElementById('seat-'+id.replace('-',''));
+  if(btn)btn.classList.add('selected');
+  // 表示更新
+  const disp=document.getElementById('seat-disp');
+  disp.textContent='選択中：'+id;
+  disp.classList.add('show');
+}
 
 // ===== ユーティリティ =====
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -459,7 +526,7 @@ async function submitOrder(){
   if(!db){toast('接続中です。少し待ってから再度お試しください');return;}
   const items=Object.values(cart).filter(i=>i.qty>0);
   if(items.length===0){toast('商品を選んでください');return;}
-  const seat=document.getElementById('seat-inp').value.trim()||'席番号なし';
+  const seat=selectedSeat||'席番号なし';
   const note=document.getElementById('order-note').value.trim();
   const btn=document.getElementById('submit-btn');
   btn.disabled=true;btn.textContent='送信中...';
@@ -483,6 +550,9 @@ async function submitOrder(){
 }
 
 function resetOrder(){
+  selectedSeat='';
+  document.querySelectorAll('.seat-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('seat-disp').classList.remove('show');
   cart={};cartOpen=false;
   document.getElementById('order-note').value='';
   document.getElementById('cart-badge').textContent='0';
@@ -497,6 +567,7 @@ function resetOrder(){
 }
 
 // ===== 初期化 =====
+buildSeats();
 buildTabs();
 buildMenu();
 </script>
