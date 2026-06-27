@@ -720,18 +720,32 @@ function execCheckout(){
   targetIds.forEach(id=>{
     (allOrders[id].items||[]).forEach(it=>total+=it.price*it.qty);
   });
-  const updates={};
-  targetIds.forEach(id=>{updates[`/orders/${id}/status`]='paid';});
   const seat=currentModalSeat;
-  // コールバック方式で書き込み（awaitを使わない）
-  db.ref().update(updates, function(error){
-    if(error){
-      toast('❌ 会計失敗: '+(error.message||error));
-    } else {
-      toast(`✅ ${seat} 会計完了 ¥${total.toLocaleString()}`);
-      closeSeatModal();
-    }
+  let completed=0;
+  let failed=0;
+  // 1件ずつ個別に更新
+  targetIds.forEach(id=>{
+    db.ref('/orders/'+id+'/status').set('paid', function(error){
+      if(error){
+        failed++;
+        toast('❌ 失敗: '+(error.message||'不明'));
+      } else {
+        completed++;
+        if(completed+failed===targetIds.length){
+          if(failed===0){
+            toast('✅ '+seat+' 会計完了 ¥'+total.toLocaleString());
+            closeSeatModal();
+          }
+        }
+      }
+    });
   });
+  // 10秒で強制タイムアウト
+  setTimeout(function(){
+    if(completed+failed<targetIds.length){
+      toast('⚠ タイムアウト — ページを再読み込みしてください');
+    }
+  },10000);
 }
 
 // ===== モーダル =====
