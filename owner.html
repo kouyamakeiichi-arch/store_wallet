@@ -176,22 +176,33 @@ header{
 }
 #new-alert.show{transform:translateX(-50%) translateY(0)}
 
-/* ===== SEAT STATUS ===== */
-.seat-bar{
-  display:flex;gap:6px;padding:8px 14px;background:var(--dark);
-  border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none;
-  align-items:center
+/* ===== FLOORPLAN ===== */
+.fp-section{
+  padding:12px 14px;background:var(--dark2);border-bottom:1px solid var(--border);flex-shrink:0
 }
-.seat-bar::-webkit-scrollbar{display:none}
+.fp-group-label{
+  font-size:9px;font-weight:700;color:var(--gray);letter-spacing:.18em;
+  text-align:center;margin-bottom:6px
+}
+.fp-counter-row{display:flex;gap:5px;justify-content:center;margin-bottom:10px}
+.fp-tables{display:flex;gap:8px}
+.fp-tbl{flex:1}
+.fp-tbl-label{
+  font-size:9px;font-weight:700;color:var(--gray);letter-spacing:.12em;
+  text-align:center;margin-bottom:4px
+}
+.fp-tbl-row{display:flex;gap:4px;justify-content:center;margin-bottom:4px}
 .seat-chip{
-  flex-shrink:0;padding:5px 10px;border-radius:6px;border:1px solid var(--border);
+  flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid var(--border);
   background:var(--dark3);font-size:11px;font-weight:700;
-  font-family:'DM Mono',monospace;color:var(--gray);letter-spacing:.06em;
-  cursor:pointer;transition:all .15s
+  font-family:'DM Mono',monospace;color:var(--gray);letter-spacing:.03em;
+  cursor:pointer;transition:all .15s;text-align:center;min-width:36px
 }
-.seat-chip.active{background:rgba(192,57,43,.18);border-color:rgba(192,57,43,.5);color:#e07060}
+.seat-chip:active{transform:scale(.93)}
+.seat-chip.active{background:rgba(192,57,43,.2);border-color:rgba(192,57,43,.55);color:#e07060}
 .seat-chip.done{background:var(--green-dim);border-color:rgba(42,154,90,.3);color:#4aaa7a}
-.seat-bar-label{font-size:9px;color:var(--gray);letter-spacing:.15em;flex-shrink:0;opacity:.6}
+.seat-chip.paid{background:rgba(90,90,90,.2);border-color:#333;color:#444;text-decoration:line-through}
+.fp-counter-row .seat-chip{min-width:40px;padding:8px 6px;font-size:12px}
 
 /* ===== SCROLLBAR ===== */ */
 .order-scroll::-webkit-scrollbar{width:4px}
@@ -263,14 +274,54 @@ header{
     <div class="stat-v green" id="s-done">—</div>
   </div>
   <div class="stat">
-    <div class="stat-l">売上（参考）</div>
+    <div class="stat-l">会計済み</div>
+    <div class="stat-v" style="color:#888" id="s-paid">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-l">本日の売上</div>
     <div class="stat-v gold" id="s-sales">—</div>
   </div>
 </div>
 
-<!-- 席状況バー -->
-<div class="seat-bar" id="seat-status-bar">
-  <span class="seat-bar-label">席</span>
+<!-- 席状況 平面図 -->
+<div class="fp-section">
+  <div class="fp-group-label">COUNTER</div>
+  <div class="fp-counter-row" id="fp-counter"></div>
+  <div class="fp-tables">
+    <div class="fp-tbl">
+      <div class="fp-tbl-label">TABLE A</div>
+      <div class="fp-tbl-row" id="fp-ta-top"></div>
+      <div class="fp-tbl-row" id="fp-ta-btm"></div>
+    </div>
+    <div class="fp-tbl">
+      <div class="fp-tbl-label">TABLE B</div>
+      <div class="fp-tbl-row" id="fp-tb-top"></div>
+      <div class="fp-tbl-row" id="fp-tb-btm"></div>
+    </div>
+    <div class="fp-tbl">
+      <div class="fp-tbl-label">TABLE C</div>
+      <div class="fp-tbl-row" id="fp-tc-top"></div>
+      <div class="fp-tbl-row" id="fp-tc-btm"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 席別注文モーダル -->
+<div class="seat-modal-bg" id="seat-modal-bg" onclick="if(event.target===this)closeSeatModal()">
+  <div class="seat-modal">
+    <div class="seat-modal-title" id="seat-modal-title">🪑 C1</div>
+    <div id="seat-modal-body"></div>
+    <div id="seat-modal-actions" style="display:none;margin-top:12px">
+      <button onclick="checkoutSeat()" style="
+        width:100%;padding:14px;border-radius:8px;border:none;
+        background:var(--gold);color:var(--black);
+        font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.18em;
+        cursor:pointer;margin-bottom:8px">
+        💴 会計する
+      </button>
+    </div>
+    <button class="seat-modal-close" onclick="closeSeatModal()">閉じる</button>
+  </div>
 </div>
 
 <!-- フィルターバー -->
@@ -408,7 +459,7 @@ function clearDone(){
   const today=new Date().toDateString();
   let count=0;
   Object.entries(orders).forEach(([id,o])=>{
-    if(o.status==='done'&&new Date(o.ts).toDateString()===today){
+    if((o.status==='done'||o.status==='paid')&&new Date(o.ts).toDateString()===today){
       db.ref(`/orders/${id}`).remove();count++;
     }
   });
@@ -446,7 +497,7 @@ function render(){
     });
 
   if(filter==='active')entries=entries.filter(([,o])=>o.status!=='done');
-  if(filter==='done')entries=entries.filter(([,o])=>o.status==='done');
+  if(filter==='done')entries=entries.filter(([,o])=>o.status==='done'||o.status==='paid');
 
   document.getElementById('order-count').textContent=entries.length+'件表示';
 
@@ -461,8 +512,8 @@ function render(){
 
   grid.innerHTML=entries.map(([id,o])=>{
     const st=o.status||'new';
-    const badgeClass=st==='new'?'badge-new':st==='making'?'badge-making':'badge-done';
-    const badgeTxt=st==='new'?'🔴 新規':st==='making'?'🔧 作成中':'✅ 完了';
+    const badgeClass=st==='new'?'badge-new':st==='making'?'badge-making':st==='paid'?'badge-green':'badge-done';
+    const badgeTxt=st==='new'?'🔴 新規':st==='making'?'🔧 作成中':st==='paid'?'💴 会計済':'✅ 完了';
     const items=(o.items||[]).map(it=>`
       <div class="ti-row">
         <span class="ti-name">${esc(it.name)}</span>
@@ -477,7 +528,9 @@ function render(){
       <div class="ticket-head">
         <div>
           <div class="ticket-num">#${o.orderNum||'?'}</div>
-          <div class="ticket-seat">🪑 ${esc(o.seat||'席番号なし')}</div>
+          <div class="ticket-seat" style="${(!o.seat||o.seat==='席番号なし')?'color:#e07060;font-weight:700':''}">
+            🪑 ${(!o.seat||o.seat==='席番号なし')?'⚠ 席番号未入力':esc(o.seat)}
+          </div>
           <div class="ticket-time">${timeStr(o.ts)}</div>
         </div>
         <span class="status-badge ${badgeClass}">${badgeTxt}</span>
@@ -500,40 +553,152 @@ function updateStats(){
   const newC=todayOrders.filter(o=>o.status==='new').length;
   const makingC=todayOrders.filter(o=>o.status==='making').length;
   const doneC=todayOrders.filter(o=>o.status==='done').length;
-  const sales=todayOrders.filter(o=>o.status==='done')
+  const paidC=todayOrders.filter(o=>o.status==='paid').length;
+  const sales=todayOrders.filter(o=>o.status==='done'||o.status==='paid')
     .reduce((s,o)=>s+(o.items||[]).reduce((ss,it)=>ss+(it.price||0)*it.qty,0),0);
   document.getElementById('s-total').textContent=todayOrders.length;
   document.getElementById('s-new').textContent=newC;
   document.getElementById('s-making').textContent=makingC;
   document.getElementById('s-done').textContent=doneC;
+  const sPaid=document.getElementById('s-paid');
+  if(sPaid)sPaid.textContent=paidC;
   document.getElementById('s-sales').textContent='¥'+sales.toLocaleString();
   updateSeatStatus(todayOrders);
 }
 
+// 席ごとの注文データを保持
+let seatOrdersCache={};
+
 function updateSeatStatus(todayOrders){
-  const bar=document.getElementById('seat-status-bar');
-  // 全席定義
-  const seats=[
-    ...['C1','C2','C3','C4','C5','C6','C7'],
-    ...['A-1','A-2','A-3','A-4','A-5','A-6'],
-    ...['B-1','B-2','B-3','B-4','B-5','B-6'],
-    ...['C-1','C-2','C-3','C-4','C-5','C-6'],
-  ];
-  // 席ごとの最新ステータスを集計
-  const seatStatus={};
+  // 席ごとに注文を集約
+  seatOrdersCache={};
+  const today2=new Date().toDateString();
   todayOrders.forEach(o=>{
     const s=o.seat||'';
     if(!s||s==='席番号なし')return;
-    // 同じ席の注文は最も「活発」なステータスを優先
-    const cur=seatStatus[s];
-    const rank={new:2,making:1,done:0};
-    if(!cur||((rank[o.status]??0)>(rank[cur]??0)))seatStatus[s]=o.status;
+    if(new Date(o.ts).toDateString()!==today2)return;
+    if(!seatOrdersCache[s])seatOrdersCache[s]=[];
+    seatOrdersCache[s].push(o);
   });
-  bar.innerHTML='<span class="seat-bar-label">席</span>'+seats.map(s=>{
-    const st=seatStatus[s]||'';
-    const cls=st==='new'||st==='making'?'active':st==='done'?'done':'';
-    return `<div class="seat-chip ${cls}" title="${s}">${s}</div>`;
-  }).join('');
+
+  // ステータス判定（new/making>done>paid>空）
+  function seatStatus(s){
+    const list=seatOrdersCache[s]||[];
+    const today=new Date().toDateString();
+    const todayList=list.filter(o=>new Date(o.ts).toDateString()===today);
+    if(todayList.some(o=>o.status==='new'))return 'active';
+    if(todayList.some(o=>o.status==='making'))return 'active';
+    if(todayList.some(o=>o.status==='done'))return 'done';
+    if(todayList.some(o=>o.status==='paid'))return 'paid';
+    return '';
+  }
+
+  function chip(s){
+    const cls=seatStatus(s);
+    return `<div class="seat-chip ${cls}" onclick="openSeatModal('${s}')">${s}</div>`;
+  }
+
+  // カウンター
+  const cnt=document.getElementById('fp-counter');
+  if(cnt)cnt.innerHTML=['C1','C2','C3','C4','C5','C6','C7'].map(chip).join('');
+
+  // テーブルA B C（平面図通り上段1-3・下段6-5-4）
+  [['ta','TA'],['tb','TB'],['tc','TC']].forEach(([key,pref])=>{
+    const top=document.getElementById('fp-'+key+'-top');
+    const btm=document.getElementById('fp-'+key+'-btm');
+    if(top)top.innerHTML=[1,2,3].map(n=>chip(pref+n)).join('');
+    if(btm)btm.innerHTML=[6,5,4].map(n=>chip(pref+n)).join('');
+  });
+}
+
+// ===== 席別注文モーダル =====
+let currentModalSeat='';
+
+function openSeatModal(seat){
+  currentModalSeat=seat;
+  const orders=seatOrdersCache[seat]||[];
+  const today=new Date().toDateString();
+  const todayOrders=orders.filter(o=>new Date(o.ts).toDateString()===today);
+  const activeOrders=todayOrders.filter(o=>o.status!=='paid');
+  const unpaidOrders=activeOrders.filter(o=>o.status!=='paid');
+
+  document.getElementById('seat-modal-title').textContent='🪑 '+seat;
+
+  if(todayOrders.length===0){
+    document.getElementById('seat-modal-body').innerHTML=
+      '<div class="seat-no-order">注文なし（空席）</div>';
+    document.getElementById('seat-modal-actions').style.display='none';
+  } else {
+    // 未会計の注文を集計
+    const itemMap={};
+    let subtotal=0;
+    unpaidOrders.forEach(o=>{
+      (o.items||[]).forEach(it=>{
+        if(!itemMap[it.name])itemMap[it.name]={price:it.price,qty:0};
+        itemMap[it.name].qty+=it.qty;
+        subtotal+=it.price*it.qty;
+      });
+    });
+
+    if(Object.keys(itemMap).length===0){
+      document.getElementById('seat-modal-body').innerHTML=
+        '<div class="seat-no-order" style="color:#4aaa7a">✅ 会計済み</div>';
+      document.getElementById('seat-modal-actions').style.display='none';
+    } else {
+      const rows=Object.entries(itemMap).map(([name,it])=>`
+        <div class="seat-order-row">
+          <span class="seat-order-name">${esc(name)} ×${it.qty}</span>
+          <span class="seat-order-price">¥${(it.price*it.qty).toLocaleString()}</span>
+        </div>`).join('');
+      document.getElementById('seat-modal-body').innerHTML=
+        rows+`<div class="seat-subtotal">
+          <span class="seat-subtotal-label">合計</span>
+          <span class="seat-subtotal-val">¥${subtotal.toLocaleString()}</span>
+        </div>`;
+      document.getElementById('seat-modal-actions').style.display='block';
+    }
+  }
+  document.getElementById('seat-modal-bg').classList.add('show');
+}
+
+function closeSeatModal(){
+  document.getElementById('seat-modal-bg').classList.remove('show');
+  currentModalSeat='';
+}
+
+// ===== 会計処理 =====
+async function checkoutSeat(){
+  if(!currentModalSeat||!db){toast('エラー');return;}
+  const orders=seatOrdersCache[currentModalSeat]||[];
+  const today=new Date().toDateString();
+  const targets=orders.filter(o=>
+    new Date(o.ts).toDateString()===today && o.status!=='paid'
+  );
+  if(targets.length===0){toast('会計済みです');closeSeatModal();return;}
+
+  // 合計を計算して確認
+  let total=0;
+  targets.forEach(o=>(o.items||[]).forEach(it=>total+=it.price*it.qty));
+
+  if(!confirm(`🪑 ${currentModalSeat}\n合計 ¥${total.toLocaleString()}\n\n会計しますか？`))return;
+
+  try{
+    // 全注文を「paid（会計済み）」に更新
+    const updates={};
+    targets.forEach(o=>{
+      // Firebaseのキーを取得
+      Object.entries(allOrders).forEach(([id,ord])=>{
+        if(ord.ts===o.ts&&ord.seat===o.seat){
+          updates[`/orders/${id}/status`]='paid';
+        }
+      });
+    });
+    await db.ref().update(updates);
+    toast(`✅ ${currentModalSeat} 会計完了 ¥${total.toLocaleString()}`);
+    closeSeatModal();
+  }catch(e){
+    toast('❌ 会計失敗: '+e.message);
+  }
 }
 
 // ===== モーダル =====
