@@ -312,13 +312,36 @@ header{
     <div class="seat-modal-title" id="seat-modal-title">🪑 C1</div>
     <div id="seat-modal-body"></div>
     <div id="seat-modal-actions" style="display:none;margin-top:12px">
-      <button onclick="checkoutSeat()" style="
-        width:100%;padding:14px;border-radius:8px;border:none;
-        background:var(--gold);color:var(--black);
-        font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.18em;
-        cursor:pointer;margin-bottom:8px">
-        💴 会計する
-      </button>
+      <!-- 通常表示 -->
+      <div id="checkout-btn-wrap">
+        <button onclick="showCheckoutConfirm()" style="
+          width:100%;padding:14px;border-radius:8px;border:none;
+          background:var(--gold);color:var(--black);
+          font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.18em;
+          cursor:pointer">
+          💴 会計する
+        </button>
+      </div>
+      <!-- 確認UI（confirmダイアログの代わり）-->
+      <div id="checkout-confirm-wrap" style="display:none">
+        <div style="font-size:13px;color:var(--gray);margin-bottom:10px;text-align:center">
+          本当に会計しますか？
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="hideCheckoutConfirm()" style="
+            flex:1;padding:12px;border-radius:8px;border:1px solid var(--border);
+            background:var(--dark3);color:var(--gray);font-size:14px;font-weight:700;cursor:pointer;
+            font-family:'Noto Sans JP',sans-serif">
+            キャンセル
+          </button>
+          <button onclick="execCheckout()" style="
+            flex:1;padding:12px;border-radius:8px;border:none;
+            background:var(--gold);color:var(--black);font-size:14px;font-weight:700;cursor:pointer;
+            font-family:'Bebas Neue',sans-serif;letter-spacing:.1em">
+            ✅ 会計確定
+          </button>
+        </div>
+      </div>
     </div>
     <button class="seat-modal-close" onclick="closeSeatModal()">閉じる</button>
   </div>
@@ -663,52 +686,52 @@ function openSeatModal(seat){
 
 function closeSeatModal(){
   document.getElementById('seat-modal-bg').classList.remove('show');
+  hideCheckoutConfirm();
   currentModalSeat='';
 }
 
 // ===== 会計処理 =====
-async function checkoutSeat(){
-  if(!currentModalSeat||!db){toast('エラー');return;}
+function getCheckoutTargetIds(){
   const today=new Date().toDateString();
-
-  // allOrdersから直接席と今日の未会計注文のキーを取得
-  const targetIds=Object.entries(allOrders)
+  return Object.entries(allOrders)
     .filter(([,o])=>
       o.seat===currentModalSeat &&
       new Date(o.ts).toDateString()===today &&
       o.status!=='paid'
     ).map(([id])=>id);
+}
 
+function showCheckoutConfirm(){
+  document.getElementById('checkout-btn-wrap').style.display='none';
+  document.getElementById('checkout-confirm-wrap').style.display='block';
+}
+function hideCheckoutConfirm(){
+  document.getElementById('checkout-confirm-wrap').style.display='none';
+  document.getElementById('checkout-btn-wrap').style.display='block';
+}
+
+async function execCheckout(){
+  if(!currentModalSeat||!db){toast('エラー');return;}
+  const targetIds=getCheckoutTargetIds();
   if(targetIds.length===0){toast('会計済みです');closeSeatModal();return;}
-
-  // 合計計算
   let total=0;
   targetIds.forEach(id=>{
     (allOrders[id].items||[]).forEach(it=>total+=it.price*it.qty);
   });
-
-  if(!confirm(`🪑 ${currentModalSeat}\n合計 ¥${total.toLocaleString()}\n\n会計しますか？`))return;
-
   try{
-    // Firebaseのキーで直接更新
     const updates={};
-    targetIds.forEach(id=>{
-      updates[`/orders/${id}/status`]='paid';
-    });
-    console.log('会計対象IDs:', targetIds);
-    console.log('updates:', updates);
-    console.log('allOrders keys:', Object.keys(allOrders));
-    if(Object.keys(updates).length===0){
-      toast('❌ 対象注文が見つかりません（席名不一致の可能性）');
-      console.log('currentModalSeat:', currentModalSeat);
-      console.log('allOrders seats:', Object.values(allOrders).map(o=>o.seat));
-      return;
-    }
+    targetIds.forEach(id=>{updates[`/orders/${id}/status`]='paid';});
+    console.log('会計実行 updates:', JSON.stringify(updates));
     await db.ref().update(updates);
     toast(`✅ ${currentModalSeat} 会計完了 ¥${total.toLocaleString()}`);
     closeSeatModal();
   }catch(e){
-    toast('❌ 会計失敗: '+e.message);
+    console.error('会計エラー詳細:', e.code, e.message);
+    if(e.code==='PERMISSION_DENIED'){
+      toast('❌ Firebase権限エラー — セキュリティルールを確認してください');
+    }else{
+      toast('❌ 会計失敗: '+e.message);
+    }
   }
 }
 
