@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>DNA BAR — ご注文</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --black:#060606;--dark:#0d0d0d;--dark2:#141414;--dark3:#1c1c1c;
+  --gold:#c8a230;--gold2:#e8c050;--gold-dim:rgba(200,162,48,.12);
+  --white:#f0ece4;--gray:#6a6660;--gray2:#2a2a2a;
+  --green:#1a7a42;--green2:#25a85a;
+  --border:rgba(200,162,48,.18);--border2:rgba(200,162,48,.4);
+  --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:'Noto Sans JP',sans-serif;background:var(--black);color:var(--white);
+  min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:160px;
+}
+
+/* ===== HEADER ===== */
+header{
+  background:var(--dark);border-bottom:1px solid var(--border);
+  padding:14px 16px;position:sticky;top:0;z-index:20
+}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.25em;color:var(--gold2)}
+.cart-fab{
+  position:relative;background:var(--gold);color:var(--black);border:none;
+  border-radius:22px;padding:8px 18px;font-family:'Bebas Neue',sans-serif;
+  font-size:16px;letter-spacing:.12em;cursor:pointer;display:flex;align-items:center;gap:6px;
+  transition:background .15s
+}
+.cart-fab:active{background:var(--gold2);transform:scale(.96)}
+.cart-fab.has-items{box-shadow:0 0 16px rgba(200,162,48,.4)}
+.cart-badge{
+  background:var(--black);color:var(--gold);border-radius:50%;
+  width:20px;height:20px;font-size:11px;display:flex;align-items:center;justify-content:center;
+  font-weight:700;border:1px solid var(--gold);font-family:'DM Mono',monospace
+}
+.seat-row{display:flex;align-items:center;gap:8px}
+.seat-row label{font-size:11px;color:var(--gray);white-space:nowrap;flex-shrink:0}
+.seat-row input{
+  flex:1;padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);
+  background:var(--dark2);color:var(--white);font-size:14px;
+  font-family:'Noto Sans JP',sans-serif;outline:none;
+}
+.seat-row input:focus{border-color:var(--gold)}
+
+/* ===== CAT TABS ===== */
+.cat-tabs{
+  display:flex;gap:0;overflow-x:auto;background:var(--dark2);
+  border-bottom:1px solid var(--border);scrollbar-width:none;
+  position:sticky;top:90px;z-index:10
+}
+.cat-tabs::-webkit-scrollbar{display:none}
+.cat-tab{
+  flex-shrink:0;padding:10px 16px;font-size:12px;font-weight:700;
+  color:var(--gray);border:none;background:none;cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  white-space:nowrap;font-family:'Noto Sans JP',sans-serif;transition:all .15s
+}
+.cat-tab.on{color:var(--gold2);border-bottom-color:var(--gold)}
+
+/* ===== MENU LIST ===== */
+.menu-section{padding:12px 14px}
+.sec-head{
+  font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.18em;
+  color:var(--gold2);margin:8px 0 10px;padding-bottom:8px;
+  border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px
+}
+.sec-note{
+  font-size:11px;font-weight:700;color:var(--gold);background:var(--gold-dim);
+  border:1px solid var(--border2);padding:2px 8px;border-radius:10px;
+  font-family:'Noto Sans JP',sans-serif;letter-spacing:.06em
+}
+.group-label{
+  font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.18em;
+  text-transform:uppercase;margin:14px 0 6px;padding-left:2px
+}
+
+/* ===== ITEM CARD ===== */
+.item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;background:var(--dark2);border:1.5px solid var(--border);
+  border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:all .15s;
+  -webkit-user-select:none;user-select:none
+}
+.item:active{transform:scale(.98)}
+.item.in-cart{border-color:var(--gold);background:rgba(200,162,48,.05)}
+.item-thumb{
+  width:56px;height:56px;border-radius:8px;background:var(--dark3);
+  display:flex;align-items:center;justify-content:center;font-size:1.7rem;
+  flex-shrink:0;overflow:hidden
+}
+.item-thumb img{width:100%;height:100%;object-fit:cover}
+.item-body{flex:1;min-width:0}
+.item-name{font-size:14px;font-weight:700;color:var(--white)}
+.item-desc{font-size:11px;color:var(--gray);margin-top:2px;line-height:1.5}
+.item-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.item-price{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);font-weight:500}
+.qty-ctrl{display:flex;align-items:center;gap:6px}
+.qty-btn{
+  width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border2);
+  background:var(--dark3);color:var(--white);font-size:18px;line-height:1;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+  transition:all .15s
+}
+.qty-btn:active{background:var(--gold);color:var(--black);border-color:var(--gold)}
+.qty-num{
+  font-family:'DM Mono',monospace;font-size:16px;color:var(--gold2);
+  min-width:22px;text-align:center;font-weight:500
+}
+
+/* ===== CART PANEL ===== */
+.cart-panel{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;background:var(--dark2);
+  border-top:1.5px solid var(--border2);padding:14px 16px 32px;
+  display:none;z-index:30;
+  box-shadow:0 -8px 32px rgba(0,0,0,.6)
+}
+.cart-panel.show{display:block}
+.cart-title{
+  font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.15em;
+  color:var(--gold2);margin-bottom:10px
+}
+.cart-list{max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.cart-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:2px 0}
+.cart-row-name{color:var(--white);flex:1}
+.cart-row-meta{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.cart-row-qty{font-family:'DM Mono',monospace;color:var(--gold);font-size:12px}
+.cart-row-price{font-family:'DM Mono',monospace;color:var(--gray);font-size:12px}
+.cart-sep{height:1px;background:var(--border);margin:6px 0}
+.cart-total-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.cart-total-label{font-size:12px;color:var(--gray)}
+.cart-total-val{font-family:'DM Mono',monospace;font-size:22px;color:var(--gold2);font-weight:500}
+.note-inp{
+  width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--border);
+  background:var(--dark3);color:var(--white);font-size:13px;
+  font-family:'Noto Sans JP',sans-serif;outline:none;margin-bottom:10px
+}
+.note-inp:focus{border-color:var(--gold)}
+.submit-btn{
+  width:100%;padding:16px;border-radius:var(--r);border:none;
+  background:var(--gold);color:var(--black);font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:.2em;cursor:pointer;transition:all .15s
+}
+.submit-btn:active{background:var(--gold2);transform:scale(.98)}
+.submit-btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ===== SUCCESS ===== */
+#success{display:none;text-align:center;padding:60px 24px}
+#success.show{display:block}
+.su-icon{font-size:3.5rem;margin-bottom:16px}
+.su-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:.2em;color:var(--gold2);margin-bottom:6px}
+.su-num{font-family:'DM Mono',monospace;font-size:56px;color:var(--gold);font-weight:500;margin:12px 0}
+.su-sub{font-size:13px;color:var(--gray);line-height:2}
+.su-again{
+  margin-top:28px;background:var(--gold-dim);color:var(--gold2);
+  border:1.5px solid var(--border2);border-radius:var(--r);
+  padding:14px 32px;font-family:'Bebas Neue',sans-serif;
+  font-size:18px;letter-spacing:.15em;cursor:pointer
+}
+.su-again:active{transform:scale(.97)}
+
+/* ===== TOAST ===== */
+#toast{
+  position:fixed;bottom:180px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:var(--gold);color:var(--black);padding:10px 22px;border-radius:20px;
+  font-size:13px;font-weight:700;z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap;pointer-events:none;opacity:0;transition:transform .3s,opacity .3s
+}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ===== SCROLLBAR ===== */
+.cart-list::-webkit-scrollbar{width:3px}
+.cart-list::-webkit-scrollbar-thumb{background:var(--gray2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- ヘッダー -->
+<header>
+  <div class="hdr-top">
+    <div class="logo">◆ DNA BAR</div>
+    <button class="cart-fab" id="cart-fab" onclick="toggleCart()">
+      🛒 CART <span class="cart-badge" id="cart-badge">0</span>
+    </button>
+  </div>
+  <div class="seat-row">
+    <label>席 / お名前</label>
+    <input type="text" id="seat-inp" placeholder="例：カウンター2番、田中" maxlength="20">
+  </div>
+</header>
+
+<!-- カテゴリタブ -->
+<div class="cat-tabs" id="cat-tabs"></div>
+
+<!-- メニュー本体 -->
+<div id="menu-wrap"></div>
+
+<!-- 注文完了画面 -->
+<div id="success">
+  <div class="su-icon">🍹</div>
+  <div class="su-title">ORDER PLACED</div>
+  <div class="su-num" id="su-num">#1</div>
+  <div class="su-sub">ご注文を受け付けました。<br>バーテンダーが準備します。<br>しばらくお待ちください。</div>
+  <button class="su-again" onclick="resetOrder()">続けて注文する</button>
+</div>
+
+<!-- カートパネル -->
+<div class="cart-panel" id="cart-panel">
+  <div class="cart-title">🛒 注文内容確認</div>
+  <div class="cart-list" id="cart-list"></div>
+  <div class="cart-sep"></div>
+  <div class="cart-total-row">
+    <span class="cart-total-label">合計（参考）</span>
+    <span class="cart-total-val" id="cart-total">¥0</span>
+  </div>
+  <input class="note-inp" id="order-note" placeholder="📝 メモ（アレルギー・氷なしなど）">
+  <button class="submit-btn" id="submit-btn" onclick="submitOrder()">注文する →</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+// ===== Firebase =====
+let db=null;
+window.addEventListener('load',()=>{
+  firebase.initializeApp({
+    apiKey:'AIzaSyCxLwJZKjbo-ucomVbAD1_LJxhL5SSYDpc',
+    databaseURL:'https://dna-wallet-57c0a-default-rtdb.firebaseio.com',
+    appId:'1:499466077674:web:c0fffd682b9bb4008a1e93'
+  });
+  db=firebase.database();
+});
+
+// ===== メニューデータ =====
+const MENU=[
+  {name:'カクテル',icon:'🍸',note:'ALL 600円',items:[
+    {name:'ジントニック',price:600,desc:'ジンベース',img:''},
+    {name:'ジンバック',price:600,desc:'ジンベース',img:''},
+    {name:'ジンリッキー',price:600,desc:'ジンベース',img:''},
+    {name:'ジンライム',price:600,desc:'ジンベース',img:''},
+    {name:'モスコミュール',price:600,desc:'ウォッカベース',img:''},
+    {name:'スクリュードライバー',price:600,desc:'ウォッカベース',img:''},
+    {name:'ブルドッグ',price:600,desc:'ウォッカベース',img:''},
+    {name:'ウォッカトニック',price:600,desc:'ウォッカベース',img:''},
+    {name:'キューバリブレ',price:600,desc:'ラムベース',img:''},
+    {name:'ラムバック',price:600,desc:'ラムベース',img:''},
+    {name:'ラムトニック',price:600,desc:'ラムベース',img:''},
+    {name:'ハイボール',price:600,desc:'ウイスキーベース',img:''},
+    {name:'ジンジャーハイボール',price:600,desc:'ウイスキーベース',img:''},
+    {name:'コークハイ',price:600,desc:'ウイスキーベース',img:''},
+    {name:'レッドアイ',price:600,desc:'ビールベース',img:''},
+    {name:'シャンディガフ',price:600,desc:'ビールベース',img:''},
+  ]},
+  {name:'アルコール',icon:'🍺',note:'ALL 500円',items:[
+    {name:'ビール',price:500,desc:'',img:''},
+    {name:'ハイボール',price:500,desc:'',img:''},
+    {name:'レモンサワー',price:500,desc:'',img:''},
+    {name:'グレープフルーツサワー',price:500,desc:'',img:''},
+    {name:'ウーロンハイ',price:500,desc:'',img:''},
+    {name:'緑茶ハイ',price:500,desc:'',img:''},
+    {name:'焼酎',price:500,desc:'',img:''},
+    {name:'ウイスキー',price:500,desc:'',img:''},
+  ]},
+  {name:'ノンアル',icon:'🥤',note:'ALL 500円',items:[
+    {name:'カルピス',price:500,desc:'',img:''},
+    {name:'コーラ',price:500,desc:'',img:''},
+    {name:'ジンジャーエール',price:500,desc:'',img:''},
+    {name:'オレンジジュース',price:500,desc:'',img:''},
+    {name:'グレープフルーツジュース',price:500,desc:'',img:''},
+    {name:'ウーロン茶',price:500,desc:'',img:''},
+    {name:'緑茶',price:500,desc:'',img:''},
+  ]},
+  {name:'フード',icon:'🍔',note:'',items:[
+    {name:'ホットドッグ',price:500,desc:'HOT DOG',img:''},
+    {name:'スパイシーチリドッグ Lv.1',price:650,desc:'辛さ控えめ',img:''},
+    {name:'スパイシーチリドッグ Lv.2',price:750,desc:'中辛',img:''},
+    {name:'スパイシーチリドッグ Lv.3',price:850,desc:'激辛',img:''},
+    {name:'えだまめ',price:300,desc:'日替りフード',img:''},
+    {name:'チリチップス',price:400,desc:'日替りフード',img:''},
+    {name:'おつまみピーナッツ',price:100,desc:'日替りフード',img:''},
+    {name:'顆粒カシン',price:100,desc:'飲む前に飲む!!',img:''},
+  ]},
+  {name:'SHOT/BOM',icon:'🥃',note:'',items:[
+    {name:'SHOT',price:300,desc:'※飲み放題対象外',img:''},
+    {name:'BOM',price:500,desc:'※飲み放題対象外',img:''},
+  ]},
+];
+
+// ===== 状態 =====
+let cart={};
+let cartOpen=false;
+
+// ===== ユーティリティ =====
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+let tTimer;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(tTimer);tTimer=setTimeout(()=>el.classList.remove('show'),2000);
+}
+
+// ===== カテゴリタブ =====
+function buildTabs(){
+  const tabs=document.getElementById('cat-tabs');
+  tabs.innerHTML=MENU.map((cat,i)=>`
+    <button class="cat-tab${i===0?' on':''}" onclick="scrollToSec(${i})" id="tab-${i}">
+      ${cat.icon} ${cat.name}
+    </button>`).join('');
+}
+
+function scrollToSec(i){
+  const el=document.getElementById('sec-'+i);
+  if(el){
+    const offset=el.getBoundingClientRect().top+window.scrollY-130;
+    window.scrollTo({top:offset,behavior:'smooth'});
+  }
+  document.querySelectorAll('.cat-tab').forEach((t,j)=>t.classList.toggle('on',j===i));
+}
+
+// スクロールでタブ自動切替
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const i=parseInt(e.target.dataset.idx);
+      document.querySelectorAll('.cat-tab').forEach((t,j)=>t.classList.toggle('on',j===i));
+      // タブを見えるようにスクロール
+      const tab=document.getElementById('tab-'+i);
+      if(tab)tab.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+    }
+  });
+},{rootMargin:'-120px 0px -60% 0px'});
+
+// ===== メニュー描画 =====
+function buildMenu(){
+  const wrap=document.getElementById('menu-wrap');
+  wrap.innerHTML=MENU.map((cat,ci)=>{
+    // descでグループ分け
+    const groups={};const order=[];
+    cat.items.forEach(it=>{
+      const k=it.desc&&it.price===cat.items[0].price?it.desc:'';
+      const gk=it.desc||'';
+      if(!groups[gk]){groups[gk]=[];order.push(gk);}
+      groups[gk].push({...it,ci,ii:cat.items.indexOf(it)});
+    });
+    const hasGroups=order.some(k=>k);
+    const itemsHtml=hasGroups
+      ?order.map(gk=>`
+          ${gk?`<div class="group-label">${esc(gk)}</div>`:''}
+          ${groups[gk].map(it=>itemHtml(it.ci,it.ii,it)).join('')}
+        `).join('')
+      :cat.items.map((it,ii)=>itemHtml(ci,ii,it)).join('');
+    return `<div class="menu-section" id="sec-${ci}" data-idx="${ci}">
+      <div class="sec-head">
+        <span>${cat.icon} ${esc(cat.name)}</span>
+        ${cat.note?`<span class="sec-note">${esc(cat.note)}</span>`:''}
+      </div>
+      ${itemsHtml}
+    </div>`;
+  }).join('');
+  // IntersectionObserver登録
+  document.querySelectorAll('.menu-section').forEach(el=>observer.observe(el));
+}
+
+function itemHtml(ci,ii,it){
+  const key=`${ci}_${ii}`;
+  const qty=cart[key]?cart[key].qty:0;
+  return `<div class="item${qty>0?' in-cart':''}" id="item-${key}" onclick="addItem('${key}','${esc(it.name)}',${it.price})">
+    <div class="item-thumb">${it.img?`<img src="${esc(it.img)}" alt="">`:(MENU[ci].icon||'🍸')}</div>
+    <div class="item-body">
+      <div class="item-name">${esc(it.name)}</div>
+      ${it.desc?`<div class="item-desc">${esc(it.desc)}</div>`:''}
+    </div>
+    <div class="item-right">
+      <div class="item-price">¥${it.price.toLocaleString()}</div>
+      ${qty>0?`<div class="qty-ctrl" onclick="event.stopPropagation()">
+        <div class="qty-btn" onclick="changeQty('${key}',-1,'${esc(it.name)}',${it.price})">−</div>
+        <div class="qty-num" id="qn-${key}">${qty}</div>
+        <div class="qty-btn" onclick="changeQty('${key}',1,'${esc(it.name)}',${it.price})">＋</div>
+      </div>`:''}
+    </div>
+  </div>`;
+}
+
+function addItem(key,name,price){
+  if(!cart[key])cart[key]={name,price,qty:0};
+  cart[key].qty++;
+  updateCartUi();
+  refreshItem(key,name,price);
+  toast(`${name} を追加しました`);
+}
+
+function changeQty(key,d,name,price){
+  if(!cart[key])return;
+  cart[key].qty+=d;
+  if(cart[key].qty<=0)delete cart[key];
+  updateCartUi();
+  refreshItem(key,name,price);
+}
+
+function refreshItem(key,name,price){
+  // アイテムカードだけ再描画
+  const el=document.getElementById('item-'+key);
+  if(!el)return;
+  const [ci,ii]=key.split('_').map(Number);
+  const it=MENU[ci]?.items[ii];
+  if(!it)return;
+  el.outerHTML=itemHtml(ci,ii,it);
+}
+
+// ===== カートUI =====
+function updateCartUi(){
+  const items=Object.values(cart).filter(i=>i.qty>0);
+  const total=items.reduce((s,i)=>s+i.price*i.qty,0);
+  const count=items.reduce((s,i)=>s+i.qty,0);
+  document.getElementById('cart-badge').textContent=count;
+  document.getElementById('cart-total').textContent='¥'+total.toLocaleString();
+  document.getElementById('cart-fab').classList.toggle('has-items',count>0);
+  // カート自動表示
+  if(count>0&&!cartOpen){
+    document.getElementById('cart-panel').classList.add('show');
+    cartOpen=true;
+  }
+  if(count===0){
+    document.getElementById('cart-panel').classList.remove('show');
+    cartOpen=false;
+  }
+  if(cartOpen)renderCartList();
+}
+
+function renderCartList(){
+  const items=Object.entries(cart).filter(([,i])=>i.qty>0);
+  document.getElementById('cart-list').innerHTML=items.map(([,i])=>`
+    <div class="cart-row">
+      <span class="cart-row-name">${esc(i.name)}</span>
+      <div class="cart-row-meta">
+        <span class="cart-row-qty">×${i.qty}</span>
+        <span class="cart-row-price">¥${(i.price*i.qty).toLocaleString()}</span>
+      </div>
+    </div>`).join('');
+}
+
+function toggleCart(){
+  cartOpen=!cartOpen;
+  document.getElementById('cart-panel').classList.toggle('show',cartOpen);
+  if(cartOpen)renderCartList();
+}
+
+// ===== 注文送信 =====
+async function submitOrder(){
+  if(!db){toast('接続中です。少し待ってから再度お試しください');return;}
+  const items=Object.values(cart).filter(i=>i.qty>0);
+  if(items.length===0){toast('商品を選んでください');return;}
+  const seat=document.getElementById('seat-inp').value.trim()||'席番号なし';
+  const note=document.getElementById('order-note').value.trim();
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='送信中...';
+  try{
+    const snap=await db.ref('/orderCounter').transaction(c=>(c||0)+1);
+    const orderNum=snap.snapshot.val();
+    await db.ref('/orders').push({
+      orderNum,seat,note,
+      items:items.map(i=>({name:i.name,price:i.price,qty:i.qty})),
+      status:'new',ts:Date.now()
+    });
+    document.getElementById('su-num').textContent='#'+orderNum;
+    document.getElementById('menu-wrap').style.display='none';
+    document.getElementById('cat-tabs').style.display='none';
+    document.getElementById('cart-panel').classList.remove('show');
+    document.getElementById('success').classList.add('show');
+  }catch(e){
+    toast('送信失敗: '+e.message);
+    btn.disabled=false;btn.textContent='注文する →';
+  }
+}
+
+function resetOrder(){
+  cart={};cartOpen=false;
+  document.getElementById('order-note').value='';
+  document.getElementById('cart-badge').textContent='0';
+  document.getElementById('cart-total').textContent='¥0';
+  document.getElementById('submit-btn').disabled=false;
+  document.getElementById('submit-btn').textContent='注文する →';
+  document.getElementById('cart-panel').classList.remove('show');
+  document.getElementById('menu-wrap').style.display='block';
+  document.getElementById('cat-tabs').style.display='flex';
+  document.getElementById('success').classList.remove('show');
+  buildMenu();
+}
+
+// ===== 初期化 =====
+buildTabs();
+buildMenu();
+</script>
+</body>
+</html>
