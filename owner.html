@@ -176,7 +176,24 @@ header{
 }
 #new-alert.show{transform:translateX(-50%) translateY(0)}
 
-/* ===== SCROLLBAR ===== */
+/* ===== SEAT STATUS ===== */
+.seat-bar{
+  display:flex;gap:6px;padding:8px 14px;background:var(--dark);
+  border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none;
+  align-items:center
+}
+.seat-bar::-webkit-scrollbar{display:none}
+.seat-chip{
+  flex-shrink:0;padding:5px 10px;border-radius:6px;border:1px solid var(--border);
+  background:var(--dark3);font-size:11px;font-weight:700;
+  font-family:'DM Mono',monospace;color:var(--gray);letter-spacing:.06em;
+  cursor:pointer;transition:all .15s
+}
+.seat-chip.active{background:rgba(192,57,43,.18);border-color:rgba(192,57,43,.5);color:#e07060}
+.seat-chip.done{background:var(--green-dim);border-color:rgba(42,154,90,.3);color:#4aaa7a}
+.seat-bar-label{font-size:9px;color:var(--gray);letter-spacing:.15em;flex-shrink:0;opacity:.6}
+
+/* ===== SCROLLBAR ===== */ */
 .order-scroll::-webkit-scrollbar{width:4px}
 .order-scroll::-webkit-scrollbar-track{background:transparent}
 .order-scroll::-webkit-scrollbar-thumb{background:var(--gray2);border-radius:2px}
@@ -249,6 +266,11 @@ header{
     <div class="stat-l">売上（参考）</div>
     <div class="stat-v gold" id="s-sales">—</div>
   </div>
+</div>
+
+<!-- 席状況バー -->
+<div class="seat-bar" id="seat-status-bar">
+  <span class="seat-bar-label">席</span>
 </div>
 
 <!-- フィルターバー -->
@@ -485,6 +507,33 @@ function updateStats(){
   document.getElementById('s-making').textContent=makingC;
   document.getElementById('s-done').textContent=doneC;
   document.getElementById('s-sales').textContent='¥'+sales.toLocaleString();
+  updateSeatStatus(todayOrders);
+}
+
+function updateSeatStatus(todayOrders){
+  const bar=document.getElementById('seat-status-bar');
+  // 全席定義
+  const seats=[
+    ...['C1','C2','C3','C4','C5','C6','C7'],
+    ...['A-1','A-2','A-3','A-4','A-5','A-6'],
+    ...['B-1','B-2','B-3','B-4','B-5','B-6'],
+    ...['C-1','C-2','C-3','C-4','C-5','C-6'],
+  ];
+  // 席ごとの最新ステータスを集計
+  const seatStatus={};
+  todayOrders.forEach(o=>{
+    const s=o.seat||'';
+    if(!s||s==='席番号なし')return;
+    // 同じ席の注文は最も「活発」なステータスを優先
+    const cur=seatStatus[s];
+    const rank={new:2,making:1,done:0};
+    if(!cur||((rank[o.status]??0)>(rank[cur]??0)))seatStatus[s]=o.status;
+  });
+  bar.innerHTML='<span class="seat-bar-label">席</span>'+seats.map(s=>{
+    const st=seatStatus[s]||'';
+    const cls=st==='new'||st==='making'?'active':st==='done'?'done':'';
+    return `<div class="seat-chip ${cls}" title="${s}">${s}</div>`;
+  }).join('');
 }
 
 // ===== モーダル =====
