@@ -429,13 +429,15 @@ function showNewAlert(){
 function connect(){
   setSyncStatus('wait','接続中...');
   try{
-    if(fbApp){try{fbApp.delete();}catch(e){}}
-    fbApp=firebase.initializeApp({
-      apiKey:cfg.key,
-      databaseURL:cfg.url,
-      appId:'1:499466077674:web:c0fffd682b9bb4008a1e93'
-    },'dna-owner-'+Date.now());
-    db=fbApp.database();
+    // デフォルトアプリが未初期化なら初期化
+    if(!firebase.apps.length){
+      firebase.initializeApp({
+        apiKey:cfg.key,
+        databaseURL:cfg.url,
+        appId:'1:499466077674:web:c0fffd682b9bb4008a1e93'
+      });
+    }
+    db=firebase.database();
     startListener();
   }catch(e){
     setSyncStatus('ng','接続失敗');
