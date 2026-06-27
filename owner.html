@@ -426,17 +426,20 @@ function showNewAlert(){
 }
 
 // ===== FIREBASE =====
-async function connect(){
+function connect(){
   setSyncStatus('wait','接続中...');
   try{
-    // 既存アプリを全削除して確実に初期化
-    const existingApps=[...firebase.apps];
-    await Promise.all(existingApps.map(app=>app.delete().catch(()=>{})));
-    const app=firebase.initializeApp({
-      apiKey:cfg.key,
-      databaseURL:cfg.url,
-      appId:'1:499466077674:web:c0fffd682b9bb4008a1e93'
-    });
+    // 既存アプリがあればそのまま使う、なければ初期化
+    let app;
+    if(firebase.apps.length>0){
+      app=firebase.apps[0];
+    } else {
+      app=firebase.initializeApp({
+        apiKey:cfg.key,
+        databaseURL:cfg.url,
+        appId:'1:499466077674:web:c0fffd682b9bb4008a1e93'
+      });
+    }
     db=app.database();
     startListener();
   }catch(e){
@@ -721,30 +724,26 @@ function execCheckout(){
     (allOrders[id].items||[]).forEach(it=>total+=it.price*it.qty);
   });
   const seat=currentModalSeat;
-  const firstId=targetIds[0];
-  // まず接続確認
-  toast('⏳ 書き込み中...');
-  firebase.database().ref('/.info/connected').once('value', function(snap){
-    const connected=snap.val();
-    if(!connected){
-      toast('❌ Firebase未接続 — ネット接続を確認してください');
-      return;
+  toast('⏳ 処理中...');
+  // dbを使って直接書き込み
+  let count=0;
+  let hasError=false;
+  function onDone(error){
+    if(error){hasError=true;toast('❌ 失敗: '+error.message);return;}
+    count++;
+    if(count===targetIds.length){
+      toast('✅ '+seat+' 会計完了 ¥'+total.toLocaleString());
+      closeSeatModal();
     }
-    // 接続OK → 書き込み
-    firebase.database().ref('/orders/'+firstId+'/status').set('paid', function(error){
-      if(error){
-        toast('❌ 書き込み失敗: '+(error.message||JSON.stringify(error)));
-      } else {
-        // 残りも更新
-        let done=1;
-        targetIds.slice(1).forEach(id=>{
-          firebase.database().ref('/orders/'+id+'/status').set('paid', function(){done++;});
-        });
-        toast('✅ '+seat+' 会計完了 ¥'+total.toLocaleString());
-        closeSeatModal();
-      }
-    });
+  }
+  targetIds.forEach(function(id){
+    db.ref('/orders/'+id+'/status').set('paid',onDone);
   });
+  setTimeout(function(){
+    if(count<targetIds.length&&!hasError){
+      toast('⚠ 応答なし — dbオブジェクト: '+(db?'あり':'なし'));
+    }
+  },5000);
 }
 
 // ===== モーダル =====
