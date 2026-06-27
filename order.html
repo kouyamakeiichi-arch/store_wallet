@@ -177,17 +177,25 @@ header{
 
 /* ===== SEAT SELECTOR ===== */
 .seat-section{padding:14px 16px;background:var(--dark2);border-bottom:1px solid var(--border)}
-.seat-section-label{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.18em;margin-bottom:8px}
-.seat-group{margin-bottom:10px}
-.seat-group-name{font-size:10px;color:var(--gray);letter-spacing:.12em;margin-bottom:6px;font-weight:700}
-.seat-btns{display:flex;flex-wrap:wrap;gap:6px}
+.seat-section-label{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.18em;margin-bottom:10px}
+.floorplan{display:flex;flex-direction:column;gap:10px}
+.fp-counter{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
+.fp-tables{display:flex;gap:8px;justify-content:space-between}
+.fp-table{flex:1}
+.fp-label{font-size:9px;color:var(--gray);letter-spacing:.14em;font-weight:700;
+  text-align:center;margin-bottom:4px;padding:3px 0;
+  border-bottom:1px solid var(--border)}
+.seat-row-fp{display:flex;gap:4px;justify-content:center;margin-bottom:4px}
 .seat-btn{
-  padding:8px 14px;border-radius:7px;border:1.5px solid var(--border);
-  background:var(--dark3);color:var(--white);font-size:13px;font-weight:700;
-  cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s;letter-spacing:.06em
+  flex:1;padding:8px 4px;border-radius:6px;border:1.5px solid var(--border);
+  background:var(--dark3);color:var(--white);font-size:11px;font-weight:700;
+  cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s;
+  text-align:center;letter-spacing:.04em;min-width:36px
 }
 .seat-btn:active{transform:scale(.93)}
 .seat-btn.selected{background:var(--gold);color:var(--black);border-color:var(--gold)}
+.counter-row{display:flex;gap:5px;justify-content:center}
+.counter-row .seat-btn{min-width:38px;padding:9px 6px;font-size:12px}
 .seat-selected-disp{
   font-size:12px;color:var(--gold2);font-weight:700;
   background:var(--gold-dim);border:1px solid var(--border2);
@@ -258,24 +266,36 @@ header{
 
 <!-- 席選択 -->
 <div class="seat-section">
-  <div class="seat-section-label">席を選んでください</div>
-  <div class="seat-group">
-    <div class="seat-group-name">COUNTER</div>
-    <div class="seat-btns" id="seat-counter"></div>
-  </div>
-  <div class="seat-group">
-    <div class="seat-group-name">TABLE A</div>
-    <div class="seat-btns" id="seat-ta"></div>
-  </div>
-  <div class="seat-group">
-    <div class="seat-group-name">TABLE B</div>
-    <div class="seat-btns" id="seat-tb"></div>
-  </div>
-  <div class="seat-group">
-    <div class="seat-group-name">TABLE C</div>
-    <div class="seat-btns" id="seat-tc"></div>
+  <div class="seat-section-label">🪑 席を選んでください</div>
+  <div class="floorplan">
+    <!-- カウンター -->
+    <div class="fp-counter">
+      <div class="fp-label">COUNTER</div>
+      <div class="counter-row" id="seat-counter"></div>
+    </div>
+    <!-- テーブル3列 -->
+    <div class="fp-tables">
+      <div class="fp-table">
+        <div class="fp-label">TABLE A</div>
+        <div class="seat-row-fp" id="seat-ta-top"></div>
+        <div class="seat-row-fp" id="seat-ta-btm"></div>
+      </div>
+      <div class="fp-table">
+        <div class="fp-label">TABLE B</div>
+        <div class="seat-row-fp" id="seat-tb-top"></div>
+        <div class="seat-row-fp" id="seat-tb-btm"></div>
+      </div>
+      <div class="fp-table">
+        <div class="fp-label">TABLE C</div>
+        <div class="seat-row-fp" id="seat-tc-top"></div>
+        <div class="seat-row-fp" id="seat-tc-btm"></div>
+      </div>
+    </div>
   </div>
   <div class="seat-selected-disp" id="seat-disp">未選択</div>
+  <div id="seat-warn" style="display:none;font-size:11px;color:#e07060;font-weight:700;margin-top:6px;padding:5px 10px;background:rgba(192,57,43,.1);border-radius:6px;border-left:2px solid #c0392b">
+    ⚠ 席を選んでから注文してください
+  </div>
 </div>
 
 <!-- カテゴリタブ -->
@@ -382,15 +402,22 @@ let selectedSeat='';
 
 // ===== 席選択 =====
 function buildSeats(){
-  // カウンター C1〜C7
+  // カウンター C1〜C7（横一列）
   const counter=document.getElementById('seat-counter');
-  counter.innerHTML=[1,2,3,4,5,6,7].map(n=>`
-    <button class="seat-btn" id="seat-C${n}" onclick="selectSeat('C${n}')">C${n}</button>`).join('');
-  // テーブルA B C 各6席
-  ['A','B','C'].forEach(t=>{
-    const el=document.getElementById('seat-t'+t.toLowerCase());
-    el.innerHTML=[1,2,3,4,5,6].map(n=>`
-      <button class="seat-btn" id="seat-${t}${n}" onclick="selectSeat('${t}-${n}')">${t}-${n}</button>`).join('');
+  if(counter)counter.innerHTML=[1,2,3,4,5,6,7].map(n=>
+    `<button class="seat-btn" id="seat-btn-C${n}" onclick="selectSeat('C${n}')">C${n}</button>`).join('');
+
+  // テーブルA B C：平面図通りの2段配置
+  // 上段：1・2・3　下段：6・5・4（平面図の向きに合わせる）
+  [['TA','seat-ta-top','seat-ta-btm'],
+   ['TB','seat-tb-top','seat-tb-btm'],
+   ['TC','seat-tc-top','seat-tc-btm']].forEach(([t,topId,btmId])=>{
+    const top=document.getElementById(topId);
+    const btm=document.getElementById(btmId);
+    if(top)top.innerHTML=[1,2,3].map(n=>
+      `<button class="seat-btn" id="seat-btn-${t}${n}" onclick="selectSeat('${t}${n}')">${t}${n}</button>`).join('');
+    if(btm)btm.innerHTML=[6,5,4].map(n=>
+      `<button class="seat-btn" id="seat-btn-${t}${n}" onclick="selectSeat('${t}${n}')">${t}${n}</button>`).join('');
   });
 }
 
@@ -399,7 +426,8 @@ function selectSeat(id){
   document.querySelectorAll('.seat-btn').forEach(b=>b.classList.remove('selected'));
   selectedSeat=id;
   // 選択ボタンをハイライト
-  const btn=document.getElementById('seat-'+id.replace('-',''));
+  const key='seat-btn-'+id;
+  const btn=document.getElementById(key);
   if(btn)btn.classList.add('selected');
   // 表示更新
   const disp=document.getElementById('seat-disp');
@@ -584,7 +612,13 @@ async function submitOrder(){
   if(!db){toast('接続中です。少し待ってから再度お試しください');return;}
   const items=Object.values(cart).filter(i=>i.qty>0);
   if(items.length===0){toast('商品を選んでください');return;}
-  const seat=selectedSeat||'席番号なし';
+  if(!selectedSeat){
+    document.getElementById('seat-warn').style.display='block';
+    document.getElementById('seat-section')?.scrollIntoView({behavior:'smooth',block:'start'});
+    toast('席を選んでください');return;
+  }
+  document.getElementById('seat-warn').style.display='none';
+  const seat=selectedSeat;
   const note=document.getElementById('order-note').value.trim();
   const btn=document.getElementById('submit-btn');
   btn.disabled=true;btn.textContent='送信中...';
@@ -611,6 +645,7 @@ function resetOrder(){
   selectedSeat='';
   document.querySelectorAll('.seat-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('seat-disp').classList.remove('show');
+  document.getElementById('seat-warn').style.display='none';
   cart={};cartOpen=false;
   document.getElementById('order-note').value='';
   document.getElementById('cart-badge').textContent='0';
@@ -621,6 +656,7 @@ function resetOrder(){
   document.getElementById('menu-wrap').style.display='block';
   document.getElementById('cat-tabs').style.display='flex';
   document.getElementById('success').classList.remove('show');
+  buildSeats();
   buildMenu();
 }
 
