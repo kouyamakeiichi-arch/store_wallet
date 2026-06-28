@@ -32,9 +32,9 @@ header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;
 /* STATS */
 .stats-bar{display:flex;gap:8px;padding:10px 14px;background:var(--dark2);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
 .stats-bar::-webkit-scrollbar{display:none}
-.stat{flex-shrink:0;background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:8px 14px;min-width:100px}
-.stat-l{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.15em;margin-bottom:3px}
-.stat-v{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--white);line-height:1}
+.stat{flex-shrink:0;background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;min-width:80px}
+.stat-l{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:3px}
+.stat-v{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--white);line-height:1}
 .stat-v.red{color:#e07060}.stat-v.green{color:var(--green2)}.stat-v.gold{color:var(--gold2)}
 
 /* FLOORPLAN */
@@ -45,7 +45,7 @@ header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;
 .fp-tbl{flex:1}
 .fp-tbl-label{font-size:9px;font-weight:700;color:var(--gray);letter-spacing:.12em;text-align:center;margin-bottom:4px}
 .fp-tbl-row{display:flex;gap:4px;justify-content:center;margin-bottom:4px}
-.seat-chip{flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid var(--border);background:var(--dark3);font-size:11px;font-weight:700;font-family:'DM Mono',monospace;color:var(--gray);cursor:pointer;transition:all .15s;text-align:center;min-width:36px}
+.seat-chip{flex:1;padding:9px 4px;border-radius:7px;border:1.5px solid var(--border);background:var(--dark3);font-size:11px;font-weight:700;font-family:'DM Mono',monospace;color:var(--gray);cursor:pointer;transition:all .15s;text-align:center;min-width:38px;min-height:40px;display:flex;align-items:center;justify-content:center}
 .seat-chip:active{transform:scale(.93)}
 .seat-chip.active{background:rgba(192,57,43,.2);border-color:rgba(192,57,43,.55);color:#e07060}
 .seat-chip.done{background:var(--green-dim);border-color:rgba(42,154,90,.3);color:#4aaa7a}
@@ -54,7 +54,7 @@ header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;
 
 /* FILTER */
 .filter-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--dark);border-bottom:1px solid var(--border);flex-shrink:0}
-.fb-btn{padding:7px 14px;border-radius:6px;border:1.5px solid var(--border);background:var(--dark3);color:var(--gray);font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;white-space:nowrap}
+.fb-btn{padding:10px 14px;border-radius:6px;border:1.5px solid var(--border);background:var(--dark3);color:var(--gray);font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;white-space:nowrap;min-height:44px}
 .fb-btn.on{background:var(--gold-dim);border-color:var(--gold);color:var(--gold2)}
 .clear-btn{margin-left:auto;padding:7px 14px;border-radius:6px;border:1px solid var(--red-dim);background:var(--red-dim);color:#e07060;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;white-space:nowrap}
 .order-count{font-size:11px;color:var(--gray);white-space:nowrap}
@@ -68,7 +68,7 @@ header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;
 .ticket.status-done,.ticket.status-paid{opacity:.55;border-color:var(--gray2)}
 @keyframes pulse-new{0%,100%{box-shadow:0 0 8px rgba(192,57,43,.2)}50%{box-shadow:0 0 22px rgba(192,57,43,.45)}}
 .ticket-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-.ticket-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--gold2);letter-spacing:.05em;line-height:1}
+.ticket-num{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold2);letter-spacing:.05em;line-height:1}
 .ticket-seat{font-size:11px;color:var(--gray);margin-top:3px}
 .ticket-time{font-size:10px;color:var(--gray);font-family:'DM Mono',monospace;margin-top:2px}
 .status-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:16px;letter-spacing:.06em;white-space:nowrap;flex-shrink:0;margin-top:4px}
@@ -82,7 +82,7 @@ header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;
 .ti-qty{font-family:'DM Mono',monospace;color:var(--gold);font-size:13px;font-weight:500}
 .ticket-note{font-size:11px;color:var(--gray);background:var(--dark3);padding:6px 10px;border-radius:6px;border-left:2px solid var(--border2)}
 .ticket-actions{display:flex;gap:7px;flex-wrap:wrap}
-.ta-btn{flex:1;min-width:72px;padding:9px 8px;border-radius:7px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif}
+.ta-btn{flex:1;min-width:72px;padding:12px 8px;border-radius:7px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;min-height:46px}
 .btn-making{background:var(--orange-dim);color:#e0904a;border:1px solid rgba(212,105,30,.35)}
 .btn-done{background:var(--green-dim);color:#4aaa7a;border:1px solid rgba(42,154,90,.3)}
 .btn-del{background:var(--dark3);color:var(--gray);border:1px solid var(--gray2);font-size:12px;flex:0;padding:9px 12px}
@@ -132,7 +132,7 @@ header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;
 .pay-btn.on{border-color:var(--gold);background:var(--gold-dim);color:var(--gold2)}
 
 /* WALLET SEARCH */
-.wallet-inp{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--dark3);color:var(--white);font-size:14px;font-family:'Noto Sans JP',sans-serif;outline:none;margin-bottom:8px}
+.wallet-inp{width:100%;padding:12px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--dark3);color:var(--white);font-size:16px;font-family:'Noto Sans JP',sans-serif;outline:none;margin-bottom:8px;min-height:48px}
 .wallet-inp:focus{border-color:var(--gold)}
 .wallet-result-box{background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;display:none}
 .wallet-result-box.show{display:block}
@@ -145,12 +145,32 @@ header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;
 .seat-modal-btns{display:flex;gap:8px;margin-top:4px}
 .seat-btn{flex:1;padding:12px;border-radius:8px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif}
 .seat-btn-cancel{background:var(--dark3);color:var(--gray);border:1px solid var(--gray2)}
-.seat-btn-ok{background:var(--gold);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.12em}
+.seat-btn-ok{background:var(--gold);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.12em;min-height:52px}
 .seat-btn-close{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--dark3);color:var(--gray);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-top:10px}
 
 .tips-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;display:none;align-items:center;justify-content:center;font-weight:700}
 .tips-badge.show{display:flex}
-@media(max-width:480px){.order-grid{grid-template-columns:1fr}.stats-bar{gap:6px;padding:8px 10px}.stat{min-width:80px;padding:7px 10px}.stat-v{font-size:19px}}
+@media(max-width:480px){
+  .order-grid{grid-template-columns:1fr}
+  .stats-bar{gap:5px;padding:7px 8px}
+  .stat{min-width:72px;padding:6px 8px}
+  .stat-v{font-size:18px}
+  .stat-l{font-size:8px}
+  .filter-bar{padding:8px 10px;gap:6px}
+  .fb-btn{padding:8px 10px;font-size:11px}
+  .clear-btn{padding:8px 10px;font-size:11px}
+  header{padding:0 12px}
+  .fp-section{padding:10px 10px}
+  .seat-chip{min-width:34px;font-size:10px}
+  .fp-counter-row .seat-chip{min-width:36px}
+}
+@media(max-width:360px){
+  .stat-v{font-size:16px}
+  .ticket-num{font-size:28px}
+  .seat-chip{min-width:30px;font-size:9px;padding:7px 2px}
+  .fp-tbl-label{font-size:8px}
+  .ta-btn{font-size:12px;padding:10px 6px}
+}
 </style>
 </head>
 <body>
