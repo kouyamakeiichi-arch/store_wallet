@@ -1176,6 +1176,7 @@ function toast(msg) {
 
 // ===== MODAL =====
 function showModal(html) { document.getElementById('modal-box').innerHTML=html; document.getElementById('modal-overlay').classList.add('show'); }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
 function hideModal() { document.getElementById('modal-overlay').classList.remove('show'); }
 document.addEventListener('click',e=>{ if(e.target===document.getElementById('modal-overlay')) hideModal(); });
 
