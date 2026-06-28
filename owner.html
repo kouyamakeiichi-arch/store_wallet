@@ -217,6 +217,65 @@ header{
   header{padding:0 12px}
   .filter-bar,.order-scroll{padding-left:10px;padding-right:10px}
 }
+
+/* ===== SEAT DETAIL MODAL ===== */
+.seat-modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;
+  display:none;align-items:flex-end;justify-content:center
+}
+.seat-modal-bg.show{display:flex}
+.seat-modal{
+  background:var(--dark2);border:1px solid var(--border2);
+  border-radius:14px 14px 0 0;width:100%;max-width:500px;
+  padding:20px 18px 32px;max-height:70vh;overflow-y:auto;
+  position:relative;z-index:201
+}
+.seat-modal-title{
+  font-family:'Bebas Neue',sans-serif;font-size:22px;
+  letter-spacing:.15em;color:var(--gold2);margin-bottom:12px
+}
+.seat-order-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+.seat-order-name{color:var(--white);flex:1}
+.seat-order-price{font-family:'DM Mono',monospace;color:var(--gold);font-size:12px}
+.seat-subtotal{
+  display:flex;justify-content:space-between;align-items:baseline;
+  border-top:1px solid var(--border);margin-top:8px;padding-top:8px
+}
+.seat-subtotal-label{font-size:11px;color:var(--gray)}
+.seat-subtotal-val{font-family:'DM Mono',monospace;font-size:20px;color:var(--gold2);font-weight:500}
+.seat-no-order{font-size:13px;color:var(--gray);padding:12px 0}
+.seat-modal-close{
+  width:100%;margin-top:14px;padding:10px;border-radius:8px;
+  border:1px solid var(--border);background:var(--dark3);color:var(--gray);
+  font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif
+}
+/* ===== PAY METHOD ===== */
+.pay-method-row{display:flex;gap:8px;margin-bottom:14px}
+.pay-method-btn{
+  flex:1;padding:12px 8px;border-radius:8px;border:1.5px solid var(--border);
+  background:var(--dark3);color:var(--gray);font-size:13px;font-weight:700;
+  cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s;
+  text-align:center;position:relative;z-index:202;pointer-events:auto
+}
+.pay-method-btn.selected{border-color:var(--gold);background:var(--gold-dim);color:var(--gold2)}
+.wallet-search-wrap{display:none;flex-direction:column;gap:8px}
+.wallet-search-wrap.show{display:flex}
+.wallet-inp{
+  width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);
+  background:var(--dark3);color:var(--white);font-size:14px;
+  font-family:'Noto Sans JP',sans-serif;outline:none
+}
+.wallet-inp:focus{border-color:var(--gold)}
+.wallet-result{
+  background:var(--dark3);border:1px solid var(--border);
+  border-radius:8px;padding:12px;display:none
+}
+.wallet-result.show{display:block}
+.wallet-customer-name{font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px}
+.wallet-balance{font-family:'DM Mono',monospace;font-size:22px;color:var(--gold2);font-weight:500}
+.wallet-balance.insufficient{color:#e07060}
+.wallet-balance-label{font-size:10px;color:var(--gray);letter-spacing:.1em;margin-bottom:2px}
+.wallet-after{font-size:11px;color:var(--gray);margin-top:4px}
 </style>
 </head>
 <body>
@@ -307,37 +366,49 @@ header{
 </div>
 
 <!-- 席別注文モーダル -->
-<div class="seat-modal-bg" id="seat-modal-bg" onclick="if(event.target===this)closeSeatModal()">
+<div class="seat-modal-bg" id="seat-modal-bg" onclick="if(event.target===document.getElementById('seat-modal-bg'))closeSeatModal()">
   <div class="seat-modal">
     <div class="seat-modal-title" id="seat-modal-title">🪑 C1</div>
     <div id="seat-modal-body"></div>
-    <div id="seat-modal-actions" style="display:none;margin-top:12px">
-      <!-- 通常表示 -->
+    <div id="seat-modal-actions" style="display:none;margin-top:14px">
+      <!-- Step1: 会計ボタン -->
       <div id="checkout-btn-wrap">
         <button onclick="showCheckoutConfirm()" style="
           width:100%;padding:14px;border-radius:8px;border:none;
           background:var(--gold);color:var(--black);
-          font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.18em;
-          cursor:pointer">
+          font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.18em;cursor:pointer">
           💴 会計する
         </button>
       </div>
-      <!-- 確認UI（confirmダイアログの代わり）-->
+      <!-- Step2: 支払い方法選択 -->
       <div id="checkout-confirm-wrap" style="display:none">
-        <div style="font-size:13px;color:var(--gray);margin-bottom:10px;text-align:center">
-          本当に会計しますか？
+        <div style="font-size:10px;color:var(--gold);letter-spacing:.15em;font-weight:700;margin-bottom:8px">支払い方法</div>
+        <div class="pay-method-row">
+          <button class="pay-method-btn selected" id="pay-cash-btn" onclick="selectPayMethod('cash')">💵 現金 / カード</button>
+          <button class="pay-method-btn" id="pay-wallet-btn" onclick="selectPayMethod('wallet')">💳 WALLET払い</button>
         </div>
-        <div style="display:flex;gap:8px">
+        <!-- WALLET検索エリア -->
+        <div class="wallet-search-wrap" id="wallet-search-wrap">
+          <input class="wallet-inp" id="wallet-search-inp" placeholder="お客さんの名前で検索..." oninput="searchWallet(this.value)">
+          <div class="wallet-result" id="wallet-result">
+            <div class="wallet-customer-name" id="wc-name">—</div>
+            <div class="wallet-balance-label">BALANCE</div>
+            <div class="wallet-balance" id="wc-balance">¥0</div>
+            <div class="wallet-after" id="wc-after"></div>
+          </div>
+        </div>
+        <!-- 確定ボタン -->
+        <div style="display:flex;gap:8px;margin-top:10px">
           <button onclick="hideCheckoutConfirm()" style="
             flex:1;padding:12px;border-radius:8px;border:1px solid var(--border);
-            background:var(--dark3);color:var(--gray);font-size:14px;font-weight:700;cursor:pointer;
-            font-family:'Noto Sans JP',sans-serif">
+            background:var(--dark3);color:var(--gray);font-size:14px;font-weight:700;
+            cursor:pointer;font-family:'Noto Sans JP',sans-serif">
             キャンセル
           </button>
-          <button onclick="execCheckout()" style="
+          <button onclick="execCheckout()" id="checkout-exec-btn" style="
             flex:1;padding:12px;border-radius:8px;border:none;
-            background:var(--gold);color:var(--black);font-size:14px;font-weight:700;cursor:pointer;
-            font-family:'Bebas Neue',sans-serif;letter-spacing:.1em">
+            background:var(--gold);color:var(--black);font-size:14px;font-weight:700;
+            cursor:pointer;font-family:'Bebas Neue',sans-serif;letter-spacing:.1em">
             ✅ 会計確定
           </button>
         </div>
@@ -442,6 +513,7 @@ function connect(){
     }
     db=app.database();
     startListener();
+    startWalletListener();
   }catch(e){
     setSyncStatus('ng','接続失敗');
     toast('接続失敗: '+e.message);
@@ -453,11 +525,12 @@ function startListener(){
   if(listener)db.ref('/orders').off('value',listener);
   listener=db.ref('/orders').on('value',snap=>{
     setSyncStatus('ok','同期中');
-    const prev=Object.keys(orders).length;
+    const isFirst=Object.keys(orders).length===0;
+    const prevNew=Object.values(orders).filter(o=>o.status==='new').length;
     orders=snap.val()||{};
-    const cur=Object.keys(orders).length;
-    const newOrders=Object.values(orders).filter(o=>o.status==='new').length;
-    if(cur>prev&&prev>0&&newOrders>0)showNewAlert();
+    const curNew=Object.values(orders).filter(o=>o.status==='new').length;
+    // 初回読み込みは除外、新規注文が増えた時だけアラート
+    if(!isFirst&&curNew>prevNew)showNewAlert();
     render();
     updateStats();
   },()=>{
@@ -693,6 +766,13 @@ function closeSeatModal(){
   document.getElementById('seat-modal-bg').classList.remove('show');
   hideCheckoutConfirm();
   currentModalSeat='';
+  // WALLET検索リセット
+  payMethod='cash';
+  selectedWalletId=null;
+  const inp=document.getElementById('wallet-search-inp');
+  if(inp)inp.value='';
+  const res=document.getElementById('wallet-result');
+  if(res)res.classList.remove('show');
 }
 
 // ===== 会計処理 =====
@@ -715,35 +795,117 @@ function hideCheckoutConfirm(){
   document.getElementById('checkout-btn-wrap').style.display='block';
 }
 
+// ===== WALLET連携 =====
+let payMethod='cash';       // 'cash' or 'wallet'
+let selectedWalletId=null;  // 選択中のcustomer ID
+let walletCustomers={};     // /customers のキャッシュ
+
+// 起動時に /customers をリアルタイムで取得
+function startWalletListener(){
+  db.ref('/customers').on('value',snap=>{
+    walletCustomers=snap.val()||{};
+  });
+}
+
+function selectPayMethod(method){
+  payMethod=method;
+  selectedWalletId=null;
+  document.getElementById('pay-cash-btn').classList.toggle('selected',method==='cash');
+  document.getElementById('pay-wallet-btn').classList.toggle('selected',method==='wallet');
+  const wrap=document.getElementById('wallet-search-wrap');
+  wrap.classList.toggle('show',method==='wallet');
+  document.getElementById('wallet-result').classList.remove('show');
+  document.getElementById('wallet-search-inp').value='';
+}
+
+function searchWallet(q){
+  selectedWalletId=null;
+  document.getElementById('wallet-result').classList.remove('show');
+  if(!q.trim())return;
+  const hit=Object.entries(walletCustomers).find(([,c])=>
+    c.name&&c.name.includes(q.trim())
+  );
+  if(!hit)return;
+  const [id,c]=hit;
+  selectedWalletId=id;
+  const total=getCurrentTotal();
+  const bal=c.balance||0;
+  const after=bal-total;
+  const balEl=document.getElementById('wc-balance');
+  document.getElementById('wc-name').textContent=c.name;
+  balEl.textContent='¥'+bal.toLocaleString();
+  balEl.className='wallet-balance'+(after<0?' insufficient':'');
+  document.getElementById('wc-after').textContent=
+    after<0?`残高不足（¥${Math.abs(after).toLocaleString()} 不足）`
+           :`支払い後残高：¥${after.toLocaleString()}`;
+  document.getElementById('wallet-result').classList.add('show');
+}
+
+function getCurrentTotal(){
+  const targetIds=getCheckoutTargetIds();
+  let total=0;
+  targetIds.forEach(id=>{
+    (orders[id]?.items||[]).forEach(it=>total+=it.price*it.qty);
+  });
+  return total;
+}
+
 function execCheckout(){
   if(!currentModalSeat||!db){toast('エラー');return;}
   const targetIds=getCheckoutTargetIds();
   if(targetIds.length===0){toast('会計済みです');closeSeatModal();return;}
-  let total=0;
-  targetIds.forEach(id=>{
-    (orders[id].items||[]).forEach(it=>total+=it.price*it.qty);
-  });
+  const total=getCurrentTotal();
   const seat=currentModalSeat;
+
+  // WALLET払いの場合：残高チェック
+  if(payMethod==='wallet'){
+    if(!selectedWalletId){toast('⚠ お客さんを検索して選択してください');return;}
+    const c=walletCustomers[selectedWalletId];
+    if(!c){toast('❌ お客さんが見つかりません');return;}
+    if((c.balance||0)<total){toast('❌ 残高不足（¥'+((c.balance||0)).toLocaleString()+'）');return;}
+  }
+
   toast('⏳ 処理中...');
-  // dbを使って直接書き込み
   let count=0;
   let hasError=false;
-  function onDone(error){
-    if(error){hasError=true;toast('❌ 失敗: '+error.message);return;}
-    count++;
-    if(count===targetIds.length){
+
+  function onOrdersDone(){
+    if(payMethod==='wallet'&&selectedWalletId){
+      // WALLETから引き落とし
+      const c=walletCustomers[selectedWalletId];
+      const newBal=(c.balance||0)-total;
+      db.ref('/customers/'+selectedWalletId).update({balance:newBal},function(err){
+        if(err){toast('❌ WALLET更新失敗: '+err.message);return;}
+        // 取引履歴に記録
+        db.ref('/transactions').push({
+          customerId:selectedWalletId,
+          type:'pay',
+          amount:total,
+          seat:seat,
+          ts:Date.now()
+        });
+        toast('✅ '+seat+' WALLET会計完了 ¥'+total.toLocaleString()+' → 残高¥'+newBal.toLocaleString());
+        closeSeatModal();
+      });
+    } else {
       toast('✅ '+seat+' 会計完了 ¥'+total.toLocaleString());
       closeSeatModal();
     }
+  }
+
+  function onDone(error){
+    if(error){hasError=true;toast('❌ 失敗: '+error.message);return;}
+    count++;
+    if(count===targetIds.length)onOrdersDone();
   }
   targetIds.forEach(function(id){
     db.ref('/orders/'+id+'/status').set('paid',onDone);
   });
   setTimeout(function(){
     if(count<targetIds.length&&!hasError){
-      toast('⚠ 応答なし — dbオブジェクト: '+(db?'あり':'なし'));
+      toast('⚠ タイムアウト');
     }
-  },5000);
+  },8000);
 }
 
 // ===== モーダル =====
