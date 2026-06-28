@@ -51,18 +51,23 @@ header{
 
 /* ===== CAT TABS ===== */
 .cat-tabs{
-  display:flex;gap:0;overflow-x:auto;background:var(--dark2);
-  border-bottom:1px solid var(--border);scrollbar-width:none;
+  display:grid;grid-template-columns:repeat(3,1fr);
+  background:var(--dark2);border-bottom:1px solid var(--border);
   position:sticky;top:0;z-index:10
 }
-.cat-tabs::-webkit-scrollbar{display:none}
 .cat-tab{
-  flex-shrink:0;padding:10px 12px;font-size:11px;font-weight:700;
+  padding:9px 6px;font-size:10px;font-weight:700;
   color:var(--gray);border:none;background:none;cursor:pointer;
-  border-bottom:2px solid transparent;margin-bottom:-1px;
-  white-space:nowrap;font-family:'Noto Sans JP',sans-serif;transition:all .15s
+  border-bottom:2px solid transparent;
+  white-space:nowrap;font-family:'Noto Sans JP',sans-serif;
+  transition:all .15s;text-align:center;overflow:hidden;
+  text-overflow:ellipsis
 }
-.cat-tab.on{color:var(--gold2);border-bottom-color:var(--gold)}
+.cat-tab.on{color:var(--gold2);border-bottom-color:var(--gold);background:rgba(200,162,48,.05)}
+/* 6個のタブを3×2グリッドに */
+.cat-tabs .cat-tab:nth-child(n+4){
+  border-top:1px solid var(--border)
+}
 
 /* ===== MENU LIST ===== */
 .menu-section{padding:12px 14px}
@@ -463,9 +468,17 @@ function toast(msg){
 // ===== カテゴリタブ =====
 function buildTabs(){
   const tabs=document.getElementById('cat-tabs');
+  // 長いカテゴリ名を短縮
+  function shortName(name){
+    return name
+      .replace('（ALL 600円）','').replace('（ALL 500円）','')
+      .replace('単品ドリンク ','').replace('単品 ','')
+      .replace('アルコール','アルコール').replace('ノンアルコール','ノンアル')
+      .trim();
+  }
   tabs.innerHTML=MENU.map((cat,i)=>`
     <button class="cat-tab${i===0?' on':''}" onclick="scrollToSec(${i})" id="tab-${i}">
-      ${cat.icon} ${cat.name}
+      ${cat.icon} ${shortName(cat.name)}
     </button>`).join('');
 }
 
