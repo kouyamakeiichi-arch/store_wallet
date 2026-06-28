@@ -795,6 +795,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--black);color:var(--w
     <div class="card" style="text-align:center;padding:14px;color:var(--gray);font-size:12px;line-height:1.9;letter-spacing:.06em">
       お支払いは店主が金額を入力します<br>タブレットをカウンターへどうぞ
     </div>
+    <button class="btn btn-secondary" style="width:100%;font-family:'Bebas Neue',sans-serif;letter-spacing:.2em;margin-bottom:8px" onclick="showTransferScreen()">💸 送金する</button>
     <div class="section-head">HISTORY</div>
     <div id="wallet-tx-list"></div>
     <div style="text-align:center;font-size:10px;color:var(--gray);letter-spacing:.12em;padding:16px 0" id="wallet-copyright">© STORE WALLET 2026</div>
@@ -842,6 +843,57 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--black);color:var(--w
   </div>
 </div>
 
+<!-- TRANSFER SCREEN -->
+<div id="transfer-input" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('customer-wallet')">&#8592;</button>
+    <div class="topbar-title">送金する</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="content">
+    <div class="balance-card">
+      <div class="balance-label">あなたの残高</div>
+      <div class="balance-amount" id="transfer-my-balance"><span>¥</span>0</div>
+      <div class="balance-name" id="transfer-my-name">—</div>
+    </div>
+    <div class="section-head">送金先を検索</div>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-group">
+        <div class="form-label">相手の名前</div>
+        <input class="form-input" type="text" id="transfer-to-name" placeholder="例：田中" oninput="searchTransferTarget(this.value)">
+      </div>
+      <div id="transfer-target-result" style="display:none;padding:12px;background:var(--dark3);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--accent);letter-spacing:.15em;margin-bottom:4px;font-family:'Bebas Neue',sans-serif">送金先</div>
+        <div style="font-size:16px;font-weight:700;color:var(--white)" id="transfer-target-display">—</div>
+      </div>
+      <div class="form-group" id="transfer-amount-group" style="display:none">
+        <div class="form-label">金額（円）</div>
+        <input class="form-input" type="number" id="transfer-amount" placeholder="0" inputmode="numeric" oninput="updateTransferPreview()">
+      </div>
+      <div id="transfer-preview" style="display:none;padding:10px 14px;background:var(--dark3);border-radius:8px;font-size:12px;color:var(--gray);letter-spacing:.06em;font-family:'DM Mono',monospace;text-align:center"></div>
+      <button class="btn btn-primary" id="transfer-confirm-btn" style="display:none" onclick="goTransferConfirm()">確認する →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRANSFER CONFIRM SCREEN -->
+<div id="transfer-confirm" class="screen">
+  <div class="pay-confirm-screen" style="position:relative">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.45em;color:var(--accent)">TRANSFER</div>
+    <div style="font-family:'DM Mono',monospace;font-size:72px;font-weight:500;color:var(--white);letter-spacing:-.02em" id="transfer-confirm-amount">¥0</div>
+    <div style="font-size:13px;color:var(--gray);letter-spacing:.1em" id="transfer-confirm-to">→ —</div>
+    <div style="width:100%;height:1px;background:var(--border)"></div>
+    <div style="text-align:center">
+      <div style="font-size:10px;color:var(--accent);letter-spacing:.18em;margin-bottom:6px;font-family:'Bebas Neue',sans-serif">送金後の残高</div>
+      <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--gray)" id="transfer-confirm-after">¥0</div>
+    </div>
+    <div style="font-size:11px;color:var(--gray);letter-spacing:.08em;margin-bottom:4px">あなたのPINを入力して確認</div>
+    <div style="display:flex;gap:8px;justify-content:center" id="transfer-pin-dots"></div>
+    <div class="pin-pad" id="transfer-pin-pad"></div>
+    <button class="btn btn-secondary" style="width:100%;font-family:'Bebas Neue',sans-serif;letter-spacing:.2em" onclick="showScreen('transfer-input')">CANCEL</button>
+  </div>
+</div>
+
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -856,6 +908,147 @@ firebase.initializeApp({
   appId:"1:499466077674:web:c0fffd682b9bb4008a1e93"
 });
 const db = firebase.database();
+
+// ===== TRANSFER STATE =====
+let transferTargetId = null;
+let transferTargetName = '';
+let transferAmount = 0;
+let transferPinBuffer = '';
+
+function showTransferScreen() {
+  const c = STATE.customers[currentCustomerId];
+  if (!c) return;
+  document.getElementById('transfer-my-balance').innerHTML = '<span>¥</span>' + (c.balance||0).toLocaleString();
+  document.getElementById('transfer-my-name').textContent = c.name;
+  document.getElementById('transfer-to-name').value = '';
+  document.getElementById('transfer-target-result').style.display = 'none';
+  document.getElementById('transfer-amount-group').style.display = 'none';
+  document.getElementById('transfer-preview').style.display = 'none';
+  document.getElementById('transfer-confirm-btn').style.display = 'none';
+  document.getElementById('transfer-amount').value = '';
+  transferTargetId = null;
+  showScreen('transfer-input');
+}
+
+function searchTransferTarget(q) {
+  transferTargetId = null;
+  document.getElementById('transfer-target-result').style.display = 'none';
+  document.getElementById('transfer-amount-group').style.display = 'none';
+  document.getElementById('transfer-confirm-btn').style.display = 'none';
+  document.getElementById('transfer-preview').style.display = 'none';
+  if (!q.trim()) return;
+  const hit = Object.entries(STATE.customers).find(([id, c]) =>
+    id !== currentCustomerId && c.name && c.name.includes(q.trim())
+  );
+  if (!hit) return;
+  const [id, c] = hit;
+  transferTargetId = id;
+  transferTargetName = c.name;
+  document.getElementById('transfer-target-display').textContent = c.name;
+  document.getElementById('transfer-target-result').style.display = 'block';
+  document.getElementById('transfer-amount-group').style.display = 'block';
+  document.getElementById('transfer-amount').value = '';
+}
+
+function updateTransferPreview() {
+  const amount = parseInt(document.getElementById('transfer-amount').value) || 0;
+  const myBal = STATE.customers[currentCustomerId]?.balance || 0;
+  const preview = document.getElementById('transfer-preview');
+  const btn = document.getElementById('transfer-confirm-btn');
+  if (amount <= 0) { preview.style.display = 'none'; btn.style.display = 'none'; return; }
+  if (amount > myBal) {
+    preview.style.display = 'block';
+    preview.textContent = '残高不足（残高 ¥' + myBal.toLocaleString() + '）';
+    preview.style.color = '#e07060';
+    btn.style.display = 'none';
+    return;
+  }
+  preview.style.display = 'block';
+  preview.style.color = 'var(--gray)';
+  preview.textContent = '送金後の残高：¥' + (myBal - amount).toLocaleString();
+  btn.style.display = 'block';
+}
+
+function goTransferConfirm() {
+  if (!transferTargetId) return;
+  transferAmount = parseInt(document.getElementById('transfer-amount').value) || 0;
+  if (transferAmount <= 0) return;
+  const myBal = STATE.customers[currentCustomerId]?.balance || 0;
+  if (transferAmount > myBal) { showModal('<p>残高が不足しています</p>'); return; }
+  // 確認画面へ
+  document.getElementById('transfer-confirm-amount').textContent = '¥' + transferAmount.toLocaleString();
+  document.getElementById('transfer-confirm-to').textContent = '→ ' + transferTargetName;
+  document.getElementById('transfer-confirm-after').textContent = '¥' + (myBal - transferAmount).toLocaleString();
+  // PINパッドをセット
+  transferPinBuffer = '';
+  buildTransferPinPad();
+  showScreen('transfer-confirm');
+}
+
+function buildTransferPinPad() {
+  const dots = document.getElementById('transfer-pin-dots');
+  const pad = document.getElementById('transfer-pin-pad');
+  dots.innerHTML = [0,1,2,3].map(i =>
+    `<div style="width:14px;height:14px;border-radius:50%;background:${transferPinBuffer.length>i?'var(--accent)':'var(--dark3)'};border:1.5px solid var(--border);transition:all .15s"></div>`
+  ).join('');
+  pad.innerHTML = [1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k =>
+    k==='' ? '<div></div>' :
+    `<button class="pin-key" onclick="transferPinInput('${k}')">${k}</button>`
+  ).join('');
+}
+
+function transferPinInput(k) {
+  if (k === '⌫') {
+    transferPinBuffer = transferPinBuffer.slice(0, -1);
+    buildTransferPinPad();
+    return;
+  }
+  if (transferPinBuffer.length >= 4) return;
+  transferPinBuffer += k;
+  buildTransferPinPad();
+  if (transferPinBuffer.length === 4) {
+    setTimeout(execTransfer, 200);
+  }
+}
+
+function execTransfer() {
+  const myCustomer = STATE.customers[currentCustomerId];
+  if (!myCustomer) return;
+  if (transferPinBuffer !== myCustomer.pin) {
+    showModal('<p style="color:#e07060;text-align:center;letter-spacing:.1em">PINが違います</p>');
+    transferPinBuffer = '';
+    buildTransferPinPad();
+    return;
+  }
+  const myNewBal = (myCustomer.balance||0) - transferAmount;
+  const toCustomer = STATE.customers[transferTargetId];
+  const toNewBal = (toCustomer?.balance||0) + transferAmount;
+  const ts = Date.now();
+  // Firebase書き込み
+  db.ref('/customers/' + currentCustomerId + '/balance').set(myNewBal);
+  db.ref('/customers/' + transferTargetId + '/balance').set(toNewBal);
+  db.ref('/transactions').push({
+    customerId: currentCustomerId,
+    type: 'transfer_out',
+    amount: transferAmount,
+    toName: transferTargetName,
+    ts
+  });
+  db.ref('/transactions').push({
+    customerId: transferTargetId,
+    type: 'transfer_in',
+    amount: transferAmount,
+    fromName: myCustomer.name,
+    ts
+  });
+  showModal(`<div style="text-align:center">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.2em;color:var(--accent);margin-bottom:8px">TRANSFER COMPLETE</div>
+    <div style="font-family:'DM Mono',monospace;font-size:32px;color:var(--white);margin-bottom:8px">¥${transferAmount.toLocaleString()}</div>
+    <div style="font-size:13px;color:var(--gray)">→ ${transferTargetName} に送金しました</div>
+    <div style="font-size:12px;color:var(--gray);margin-top:6px">残高：¥${myNewBal.toLocaleString()}</div>
+    <button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="closeModal();showScreen('customer-wallet')">ウォレットに戻る</button>
+  </div>`);
+}
 
 // ===== STATE =====
 let STATE = { storeName:'STORE WALLET', storeAddr:'SUMIKAWA 4-2-5, TOMAKOMAI', storeCopy:'© STORE WALLET 2026', themeColor:'#c8860a', pin:'0000', premium:0, customers:{}, transactions:{} };
@@ -1322,16 +1515,11 @@ function updatePinDots(dotsId,len) {
 
 // ===== OWNER HOME =====
 function renderOwnerHome() {
-  const focused = document.activeElement;
-  const setIfNotFocused = (id, val) => {
-    const el = document.getElementById(id);
-    if (el && el !== focused) el.value = val;
-  };
-  setIfNotFocused('store-name-input', STATE.storeName||'');
-  setIfNotFocused('store-addr-input', STATE.storeAddr||'');
-  setIfNotFocused('store-copy-input', STATE.storeCopy||'');
-  setIfNotFocused('pin-input', STATE.pin||'0000');
-  setIfNotFocused('premium-input', STATE.premium||'');
+  document.getElementById('store-name-input').value=STATE.storeName||'';
+  document.getElementById('store-addr-input').value=STATE.storeAddr||'';
+  document.getElementById('store-copy-input').value=STATE.storeCopy||'';
+  document.getElementById('pin-input').value=STATE.pin||'0000';
+  document.getElementById('premium-input').value=STATE.premium||'';
   updatePremiumPreview();
   renderColorSwatches();
 
@@ -1428,16 +1616,21 @@ function renderDetailTx(id) {
   const txs=Object.values(STATE.transactions||{}).filter(t=>t.customerId===id).sort((a,b)=>b.ts-a.ts).slice(0,30);
   const el=document.getElementById('detail-tx-list');
   if(txs.length===0){el.innerHTML=`<div class="empty-state" style="padding:24px"><p>履歴なし</p></div>`;return;}
-  el.innerHTML=txs.map(t=>`
-    <div class="tx-item">
-      <div class="tx-icon ${t.type}">${t.type==='charge'?'↑':'↓'}</div>
-      <div class="tx-info"><div class="tx-title">${t.type==='charge'?'チャージ':'お支払い'}</div><div class="tx-date">${dateStr(t.ts)}</div></div>
+  el.innerHTML=txs.map(t=>{
+    const isIn=t.type==='charge'||t.type==='transfer_in';
+    const iconChar=t.type==='charge'?'↑':t.type==='transfer_in'?'↙':t.type==='transfer_out'?'↗':'↓';
+    const iconCls=isIn?'charge':'pay';
+    const title=t.type==='charge'?'チャージ':t.type==='transfer_in'?`受取 ← ${t.fromName||''}`:t.type==='transfer_out'?`送金 → ${t.toName||''}`:'お支払い';
+    const sign=isIn?'+':'-';
+    return `<div class="tx-item">
+      <div class="tx-icon ${iconCls}">${iconChar}</div>
+      <div class="tx-info"><div class="tx-title">${title}</div><div class="tx-date">${dateStr(t.ts)}</div></div>
       <div>
-        <div class="tx-amount ${t.type}">${t.type==='charge'?'+':'-'}${fmt(t.amount)}</div>
+        <div class="tx-amount ${iconCls}">${sign}${fmt(t.amount)}</div>
         ${t.type==='charge'&&t.bonus>0?`<div style="font-size:10px;color:var(--accent);text-align:right;font-family:'Bebas Neue',sans-serif">+${t.bonus} PTS</div>`:''}
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function updateChargePreview(v){
