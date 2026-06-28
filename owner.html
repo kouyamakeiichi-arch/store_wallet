@@ -148,6 +148,8 @@ header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;
 .seat-btn-ok{background:var(--gold);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.12em}
 .seat-btn-close{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--dark3);color:var(--gray);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-top:10px}
 
+.tips-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;display:none;align-items:center;justify-content:center;font-weight:700}
+.tips-badge.show{display:flex}
 @media(max-width:480px){.order-grid{grid-template-columns:1fr}.stats-bar{gap:6px;padding:8px 10px}.stat{min-width:80px;padding:7px 10px}.stat-v{font-size:19px}}
 </style>
 </head>
@@ -166,6 +168,15 @@ header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;
       <button class="cfg-btn cfg-btn-cancel" onclick="closeCfgModal()">キャンセル</button>
       <button class="cfg-btn cfg-btn-ok" onclick="saveAndConnect()">接続する</button>
     </div>
+  </div>
+</div>
+
+<!-- おごりモーダル -->
+<div class="seat-modal-bg" id="tips-modal-bg">
+  <div class="seat-modal">
+    <div class="seat-modal-title">🍺 おごり通知</div>
+    <div id="tips-modal-body"></div>
+    <button class="seat-btn-close" onclick="closeTipsModal()">閉じる</button>
   </div>
 </div>
 
@@ -223,7 +234,24 @@ header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;
 
 <!-- 平面図 -->
 <div class="fp-section">
-  <div class="fp-group-label">COUNTER</div>
+  <!-- OWNERをカウンター中央上に配置 -->
+  <div style="display:flex;align-items:flex-end;justify-content:center;margin-bottom:4px">
+    <div style="display:flex;gap:5px;align-items:center">
+      <!-- C1 C2 C3 はrenderFloorplanで動的生成 -->
+      <div style="display:flex;gap:5px" id="fp-counter-left"></div>
+      <!-- OWNER（C3とC4の間・上） -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+        <div style="position:relative;display:inline-block">
+          <div class="seat-chip" id="fp-owner" onclick="openTipsModal()" style="min-width:64px;padding:6px 8px;background:rgba(200,162,48,.12);border-color:var(--gold);color:var(--gold2);font-size:10px">🍺<br>OWNER</div>
+          <div class="tips-badge" id="tips-badge">0</div>
+        </div>
+        <div style="width:2px;height:12px;background:var(--border2);border-radius:1px"></div>
+      </div>
+      <!-- C4 C5 C6 C7 -->
+      <div style="display:flex;gap:5px" id="fp-counter-right"></div>
+    </div>
+  </div>
+  <div class="fp-group-label" style="margin-bottom:4px">COUNTER</div>
   <div class="fp-counter-row" id="fp-counter"></div>
   <div class="fp-tables">
     <div class="fp-tbl"><div class="fp-tbl-label">TABLE A</div><div class="fp-tbl-row" id="fp-ta-top"></div><div class="fp-tbl-row" id="fp-ta-btm"></div></div>
@@ -361,6 +389,20 @@ function startListeners() {
   // 顧客リスナー（WALLET連携）
   db.ref('/customers').on('value', snap => {
     customers = snap.val() || {};
+  });
+
+  // おごり通知リスナー
+  db.ref('/tips').on('value', snap => {
+    const tips = snap.val() || {};
+    const newTips = Object.values(tips).filter(t => t.status === 'new');
+    const badge = document.getElementById('tips-badge');
+    if (newTips.length > 0) {
+      badge.textContent = newTips.length;
+      badge.classList.add('show');
+      document.getElementById('fp-owner').style.animation = 'pulse-new 1s 3';
+    } else {
+      badge.classList.remove('show');
+    }
   });
 }
 
@@ -628,6 +670,52 @@ function doCheckout() {
     });
   });
 }
+
+// ===== おごりモーダル =====
+function openTipsModal() {
+  db.ref('/tips').once('value', snap => {
+    const tips = snap.val() || {};
+    const today = new Date().toDateString();
+    const entries = Object.entries(tips)
+      .filter(([,t]) => new Date(t.ts).toDateString() === today)
+      .sort((a,b) => b[1].ts - a[1].ts);
+    const body = document.getElementById('tips-modal-body');
+    if (!entries.length) {
+      body.innerHTML = '<div style="font-size:13px;color:var(--gray);padding:12px 0">まだおごってもらっていません</div>';
+    } else {
+      const total = entries.reduce((s,[,t]) => s + t.amount, 0);
+      body.innerHTML = entries.map(([id,t]) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--white)">🍺 ${esc(t.fromName||'?')} さんから</div>
+            <div style="font-size:10px;color:var(--gray)">${timeStr(t.ts)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-family:'DM Mono',monospace;font-size:16px;color:var(--gold2)">¥${t.amount.toLocaleString()}</div>
+            ${t.status==='new'?`<button onclick="markTipRead('${id}')" style="font-size:10px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--dark3);color:var(--gray);cursor:pointer;font-family:'Noto Sans JP',sans-serif">既読</button>`:'<span style="font-size:10px;color:var(--gray)">✓</span>'}
+          </div>
+        </div>`).join('') +
+        `<div style="display:flex;justify-content:space-between;padding:12px 0 4px;font-size:13px">
+          <span style="color:var(--gray)">本日合計</span>
+          <span style="font-family:'DM Mono',monospace;color:var(--gold2);font-size:18px;font-weight:500">¥${total.toLocaleString()}</span>
+        </div>`;
+    }
+    document.getElementById('tips-modal-bg').classList.add('show');
+  });
+}
+
+function closeTipsModal() {
+  document.getElementById('tips-modal-bg').classList.remove('show');
+}
+
+function markTipRead(id) {
+  if (!db) return;
+  db.ref('/tips/'+id+'/status').set('read');
+}
+
+document.getElementById('tips-modal-bg').addEventListener('click', function(e) {
+  if (e.target === this) closeTipsModal();
+});
 
 // ===== Firebase設定モーダル =====
 function openCfgModal() {
