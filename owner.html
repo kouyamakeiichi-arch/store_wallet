@@ -171,11 +171,93 @@ header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;
   .fp-tbl-label{font-size:8px}
   .ta-btn{font-size:12px;padding:10px 6px}
 }
+
+/* ===== HAMBURGER MENU ===== */
+.hbg-btn{
+  width:40px;height:40px;border:none;background:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  border-radius:8px;padding:6px;transition:background .15s
+}
+.hbg-btn:hover{background:var(--dark3)}
+.hbg-line{width:22px;height:2px;background:var(--white);border-radius:2px;transition:all .3s}
+.hbg-btn.open .hbg-line:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hbg-btn.open .hbg-line:nth-child(2){opacity:0}
+.hbg-btn.open .hbg-line:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer-bg.show{opacity:1;pointer-events:auto}
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;width:min(300px,85vw);
+  background:var(--dark2);border-left:1px solid var(--border2);
+  z-index:301;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;overflow-y:auto
+}
+.drawer.show{transform:translateX(0)}
+.drawer-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.drawer-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.2em;color:var(--gold2)}
+.drawer-close{width:36px;height:36px;border:none;background:var(--dark3);border-radius:8px;color:var(--gray);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.drawer-section{padding:14px 18px;border-bottom:1px solid var(--border)}
+.drawer-section-label{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.18em;margin-bottom:10px}
+.drawer-item{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;
+  background:var(--dark3);border:1px solid var(--border);margin-bottom:8px;
+  cursor:pointer;transition:all .15s;font-size:14px;font-weight:700;color:var(--white);
+  font-family:'Noto Sans JP',sans-serif
+}
+.drawer-item:active{background:var(--gold-dim);border-color:var(--gold)}
+.drawer-item-icon{font-size:20px;flex-shrink:0;width:28px;text-align:center}
+.drawer-item.danger{color:#e07060;border-color:rgba(192,57,43,.3)}
+.drawer-item.danger:active{background:var(--red-dim)}
 </style>
 </head>
 <body>
 
 <div id="new-alert">🔔 新しい注文が入りました！</div>
+
+<!-- ドロワーメニュー -->
+<div class="drawer-bg" id="drawer-bg" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title">◆ DNA BAR</div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+
+  <div class="drawer-section">
+    <div class="drawer-section-label">ナビゲーション</div>
+    <div class="drawer-item" onclick="setFilter('all');closeDrawer()">
+      <span class="drawer-item-icon">📋</span>すべての注文
+    </div>
+    <div class="drawer-item" onclick="setFilter('active');closeDrawer()">
+      <span class="drawer-item-icon">🔴</span>未対応・作成中
+    </div>
+    <div class="drawer-item" onclick="setFilter('done');closeDrawer()">
+      <span class="drawer-item-icon">✅</span>完了済み
+    </div>
+  </div>
+
+  <div class="drawer-section">
+    <div class="drawer-section-label">設定・操作</div>
+    <div class="drawer-item" onclick="openCfgModal();closeDrawer()">
+      <span class="drawer-item-icon">🔥</span>Firebase設定
+    </div>
+    <div class="drawer-item" onclick="db&&db.ref('/orderCounter').set(0)&&toast('注文番号をリセットしました');closeDrawer()">
+      <span class="drawer-item-icon">⟳</span>注文番号リセット
+    </div>
+    <div class="drawer-item danger" onclick="clearDone();closeDrawer()">
+      <span class="drawer-item-icon">🗑</span>完了・会計済みを削除
+    </div>
+  </div>
+
+  <div class="drawer-section">
+    <div class="drawer-section-label">同期状態</div>
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:13px;color:var(--gray)">
+      <span class="dot wait" id="drawer-sync-dot"></span>
+      <span id="drawer-sync-txt">未接続</span>
+    </div>
+    <div style="font-size:11px;color:var(--gray);margin-top:4px;line-height:1.7">
+      Firebase設定ピルをタップして接続してください
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <!-- Firebase設定モーダル -->
@@ -239,6 +321,11 @@ header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;
       <span class="dot wait" id="sync-dot"></span>
       <span id="sync-txt">未接続</span>
     </div>
+    <button class="hbg-btn" id="hbg-btn" onclick="toggleDrawer()">
+      <span class="hbg-line"></span>
+      <span class="hbg-line"></span>
+      <span class="hbg-line"></span>
+    </button>
   </div>
 </header>
 
@@ -356,6 +443,32 @@ function showAlert() {
   el.classList.add('show');
   clearTimeout(alertTimer);
   alertTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ===== DRAWER =====
+function toggleDrawer(){
+  const btn=document.getElementById('hbg-btn');
+  const drawer=document.getElementById('drawer');
+  const bg=document.getElementById('drawer-bg');
+  const isOpen=drawer.classList.contains('show');
+  if(isOpen){ closeDrawer(); }
+  else {
+    btn.classList.add('open');
+    drawer.classList.add('show');
+    bg.classList.add('show');
+    // 同期状態を更新
+    const dot=document.getElementById('drawer-sync-dot');
+    const txt=document.getElementById('drawer-sync-txt');
+    const mainDot=document.getElementById('sync-dot');
+    const mainTxt=document.getElementById('sync-txt');
+    if(dot&&mainDot){ dot.className=mainDot.className; }
+    if(txt&&mainTxt){ txt.textContent=mainTxt.textContent; }
+  }
+}
+function closeDrawer(){
+  document.getElementById('hbg-btn').classList.remove('open');
+  document.getElementById('drawer').classList.remove('show');
+  document.getElementById('drawer-bg').classList.remove('show');
 }
 
 // ===== Firebase =====
