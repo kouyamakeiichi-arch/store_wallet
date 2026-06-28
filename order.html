@@ -338,10 +338,12 @@ window.addEventListener('load',()=>{
     appId:'1:499466077674:web:c0fffd682b9bb4008a1e93'
   });
   db=firebase.database();
+  // Firebaseからメニューを読み込む（デフォルトより優先）
+  loadMenuFromFirebase();
 });
 
-// ===== メニューデータ =====
-const MENU=[
+// ===== メニューデータ（Firebaseから読み込む・デフォルトはフォールバック用）=====
+let MENU=[
   {name:'カクテル',icon:'🍸',note:'ALL 600円',items:[
     {name:'ジントニック',price:600,desc:'ジンベース',img:''},
     {name:'ジンバック',price:600,desc:'ジンベース',img:''},
@@ -394,6 +396,20 @@ const MENU=[
     {name:'BOM',price:500,desc:'※飲み放題対象外',img:''},
   ]},
 ];
+
+// Firebaseからメニューを読み込んで上書き
+function loadMenuFromFirebase(){
+  firebase.database().ref('/menu').once('value', function(snap){
+    const data = snap.val();
+    if(data && data.cats && data.cats.length){
+      MENU = data.cats;
+      // 再描画
+      buildTabs();
+      buildMenu();
+      buildSeats();
+    }
+  });
+}
 
 // ===== 状態 =====
 let cart={};
