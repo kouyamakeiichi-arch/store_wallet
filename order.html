@@ -238,6 +238,40 @@ header{
 /* ===== SCROLLBAR ===== */ */ */
 .cart-list::-webkit-scrollbar{width:3px}
 .cart-list::-webkit-scrollbar-thumb{background:var(--gray2);border-radius:2px}
+
+/* ===== HAMBURGER ===== */
+.hbg-btn{
+  width:40px;height:40px;border:none;background:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  border-radius:8px;padding:6px
+}
+.hbg-line{width:22px;height:2px;background:var(--white);border-radius:2px;transition:all .3s}
+.hbg-btn.open .hbg-line:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hbg-btn.open .hbg-line:nth-child(2){opacity:0}
+.hbg-btn.open .hbg-line:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer-bg.show{opacity:1;pointer-events:auto}
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;width:min(280px,85vw);
+  background:var(--dark2);border-left:1px solid var(--border2);
+  z-index:301;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;overflow-y:auto
+}
+.drawer.show{transform:translateX(0)}
+.drawer-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.drawer-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.2em;color:var(--gold2)}
+.drawer-close{width:36px;height:36px;border:none;background:var(--dark3);border-radius:8px;color:var(--gray);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.drawer-section{padding:14px 18px;border-bottom:1px solid var(--border)}
+.drawer-section-label{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.18em;margin-bottom:10px}
+.drawer-item{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;
+  background:var(--dark3);border:1px solid var(--border);margin-bottom:8px;
+  cursor:pointer;transition:all .15s;font-size:14px;font-weight:700;color:var(--white);
+  font-family:'Noto Sans JP',sans-serif
+}
+.drawer-item:active{background:var(--gold-dim);border-color:var(--gold)}
+.drawer-item-icon{font-size:20px;flex-shrink:0;width:28px;text-align:center}
+.drawer-item.danger{color:#e07060;border-color:rgba(192,57,43,.3)}
 @media(max-width:360px){
   .seat-btn{font-size:10px;min-width:32px;padding:8px 2px}
   .fp-counter-row .seat-btn{min-width:34px}
@@ -251,6 +285,27 @@ header{
 <body>
 
 <div id="toast"></div>
+
+<!-- ドロワーメニュー -->
+<div class="drawer-bg" id="drawer-bg" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title">◆ DNA BAR</div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+
+  <div class="drawer-section">
+    <div class="drawer-section-label">カテゴリジャンプ</div>
+    <div id="drawer-cats"></div>
+  </div>
+
+  <div class="drawer-section">
+    <div class="drawer-section-label">設定・操作</div>
+    <div class="drawer-item danger" onclick="openResetModal();closeDrawer()">
+      <span class="drawer-item-icon">⟳</span>注文番号リセット
+    </div>
+  </div>
+</div>
 
 <!-- 注文番号リセットモーダル（オーナー用） -->
 <div class="reset-modal-bg" id="reset-modal-bg">
@@ -271,9 +326,16 @@ header{
 <header>
   <div class="hdr-top">
     <div class="logo">◆ DNA BAR</div>
-    <button class="cart-fab" id="cart-fab" onclick="toggleCart()">
-      🛒 CART <span class="cart-badge" id="cart-badge">0</span>
-    </button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="cart-fab" id="cart-fab" onclick="toggleCart()">
+        🛒 CART <span class="cart-badge" id="cart-badge">0</span>
+      </button>
+      <button class="hbg-btn" id="hbg-btn" onclick="toggleDrawer()">
+        <span class="hbg-line"></span>
+        <span class="hbg-line"></span>
+        <span class="hbg-line"></span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -695,6 +757,31 @@ function resetOrder(){
   document.getElementById('success').classList.remove('show');
   buildSeats();
   buildMenu();
+}
+
+// ===== DRAWER =====
+function toggleDrawer(){
+  const btn=document.getElementById('hbg-btn');
+  const drawer=document.getElementById('drawer');
+  const bg=document.getElementById('drawer-bg');
+  const isOpen=drawer.classList.contains('show');
+  if(isOpen){ closeDrawer(); return; }
+  // カテゴリリストを動的生成
+  const cats=document.getElementById('drawer-cats');
+  if(cats){
+    cats.innerHTML=MENU.map((cat,i)=>`
+      <div class="drawer-item" onclick="scrollToSec(${i});closeDrawer()">
+        <span class="drawer-item-icon">${cat.icon}</span>${cat.name.replace('（ALL 600円）','').replace('（ALL 500円）','').replace('単品ドリンク ','').trim()}
+      </div>`).join('');
+  }
+  btn.classList.add('open');
+  drawer.classList.add('show');
+  bg.classList.add('show');
+}
+function closeDrawer(){
+  document.getElementById('hbg-btn').classList.remove('open');
+  document.getElementById('drawer').classList.remove('show');
+  document.getElementById('drawer-bg').classList.remove('show');
 }
 
 // ===== 初期化 =====
