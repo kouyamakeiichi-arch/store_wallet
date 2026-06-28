@@ -134,7 +134,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--black);color:var(--w
 .pin-dots{display:flex;gap:16px}
 .pin-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--gray2);transition:all .2s}
 .pin-dot.filled{background:var(--accent);border-color:var(--accent);box-shadow:0 0 8px rgba(200,134,10,0.5)}
-.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.pin-keypad,.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
 .pin-key{aspect-ratio:1.4;border-radius:var(--radius);border:1px solid var(--border);background:var(--dark2);color:var(--white);font-family:'DM Mono',monospace;font-size:24px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s}
 .pin-key:active{background:var(--accent);color:var(--black);border-color:var(--accent)}
 .pin-key.del{font-size:16px;color:var(--gray)}
@@ -790,12 +790,16 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--black);color:var(--w
       <div class="balance-amount" id="wallet-balance"><span>¥</span>0</div>
       <div class="balance-name" id="wallet-name-label">—</div>
     </div>
+    <div style="display:flex;gap:10px;margin-bottom:4px">
+      <button onclick="showTransferScreen()" style="flex:1;padding:14px 8px;border-radius:10px;border:1.5px solid var(--border);background:var(--dark3);color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.12em;cursor:pointer;text-align:center">💸<br><span style="font-size:11px;letter-spacing:.06em;font-family:'Noto Sans JP',sans-serif;font-weight:700">送金する</span></button>
+      <button onclick="showOgoru()" style="flex:1;padding:14px 8px;border-radius:10px;border:1.5px solid var(--accent);background:rgba(200,162,48,.08);color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.12em;cursor:pointer;text-align:center">🍺<br><span style="font-size:11px;letter-spacing:.06em;font-family:'Noto Sans JP',sans-serif;font-weight:700">オーナーにおごる</span></button>
+    </div>
     <div class="section-head">ボーナスポイント RANKING</div>
     <div class="ranking-card" id="dan-ranking"></div>
     <div class="card" style="text-align:center;padding:14px;color:var(--gray);font-size:12px;line-height:1.9;letter-spacing:.06em">
       お支払いは店主が金額を入力します<br>タブレットをカウンターへどうぞ
     </div>
-    <button class="btn btn-secondary" style="width:100%;font-family:'Bebas Neue',sans-serif;letter-spacing:.2em;margin-bottom:8px" onclick="showTransferScreen()">💸 送金する</button>
+
     <div class="section-head">HISTORY</div>
     <div id="wallet-tx-list"></div>
     <div style="text-align:center;font-size:10px;color:var(--gray);letter-spacing:.12em;padding:16px 0" id="wallet-copyright">© STORE WALLET 2026</div>
@@ -891,6 +895,54 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--black);color:var(--w
     <div style="display:flex;gap:8px;justify-content:center" id="transfer-pin-dots"></div>
     <div class="pin-pad" id="transfer-pin-pad"></div>
     <button class="btn btn-secondary" style="width:100%;font-family:'Bebas Neue',sans-serif;letter-spacing:.2em" onclick="showScreen('transfer-input')">CANCEL</button>
+  </div>
+</div>
+
+<!-- OGORU SCREEN -->
+<div id="ogoru-screen" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showScreen('customer-wallet')">&#8592;</button>
+    <div class="topbar-title">🍺 オーナーに1杯おごる</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="content">
+    <div class="balance-card">
+      <div class="balance-label">あなたの残高</div>
+      <div class="balance-amount" id="ogoru-my-balance"><span>¥</span>0</div>
+      <div class="balance-name" id="ogoru-my-name">—</div>
+    </div>
+    <div class="section-head">金額を選ぶ</div>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary" id="ogoru-btn-500" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.1em" onclick="selectOgoruAmount(500)">¥500</button>
+        <button class="btn btn-secondary" id="ogoru-btn-600" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.1em" onclick="selectOgoruAmount(600)">¥600</button>
+        <button class="btn btn-secondary" id="ogoru-btn-1000" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.1em" onclick="selectOgoruAmount(1000)">¥1,000</button>
+      </div>
+      <div id="ogoru-preview" style="display:none;padding:10px 14px;background:var(--dark3);border-radius:8px;font-size:12px;color:var(--gray);letter-spacing:.06em;font-family:'DM Mono',monospace;text-align:center"></div>
+      <button class="btn btn-primary" id="ogoru-go-btn" style="display:none;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.2em" onclick="goOgoruConfirm()">🍺 おごる！</button>
+    </div>
+    <div class="card" style="font-size:11px;color:var(--gray);line-height:1.9;letter-spacing:.06em;text-align:center">
+      オーナーへの感謝の気持ちを<br>ドリンク1杯分として送ります。<br>あなたのWALLET残高から引き落とされます。
+    </div>
+  </div>
+</div>
+
+<!-- OGORU CONFIRM -->
+<div id="ogoru-confirm" class="screen">
+  <div class="pay-confirm-screen" style="position:relative">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.45em;color:var(--accent)">TREAT OWNER</div>
+    <div style="font-size:2rem;margin:8px 0">🍺</div>
+    <div style="font-family:'DM Mono',monospace;font-size:72px;font-weight:500;color:var(--white);letter-spacing:-.02em" id="ogoru-confirm-amount">¥0</div>
+    <div style="font-size:13px;color:var(--gray);letter-spacing:.1em">→ オーナーへ</div>
+    <div style="width:100%;height:1px;background:var(--border)"></div>
+    <div style="text-align:center">
+      <div style="font-size:10px;color:var(--accent);letter-spacing:.18em;margin-bottom:6px;font-family:'Bebas Neue',sans-serif">送金後の残高</div>
+      <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--gray)" id="ogoru-confirm-after">¥0</div>
+    </div>
+    <div style="font-size:11px;color:var(--gray);letter-spacing:.08em;margin-bottom:4px">あなたのPINを入力して確認</div>
+    <div style="display:flex;gap:8px;justify-content:center" id="ogoru-pin-dots"></div>
+    <div class="pin-pad" id="ogoru-pin-pad"></div>
+    <button class="btn btn-secondary" style="width:100%;font-family:'Bebas Neue',sans-serif;letter-spacing:.2em" onclick="showScreen('ogoru-screen')">CANCEL</button>
   </div>
 </div>
 
@@ -991,7 +1043,7 @@ function buildTransferPinPad() {
   dots.innerHTML = [0,1,2,3].map(i =>
     `<div style="width:14px;height:14px;border-radius:50%;background:${transferPinBuffer.length>i?'var(--accent)':'var(--dark3)'};border:1.5px solid var(--border);transition:all .15s"></div>`
   ).join('');
-  pad.innerHTML = [1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k =>
+  pad.innerHTML = [7,8,9,4,5,6,1,2,3,'',0,'⌫'].map(k =>
     k==='' ? '<div></div>' :
     `<button class="pin-key" onclick="transferPinInput('${k}')">${k}</button>`
   ).join('');
@@ -1046,6 +1098,122 @@ function execTransfer() {
     <div style="font-family:'DM Mono',monospace;font-size:32px;color:var(--white);margin-bottom:8px">¥${transferAmount.toLocaleString()}</div>
     <div style="font-size:13px;color:var(--gray)">→ ${transferTargetName} に送金しました</div>
     <div style="font-size:12px;color:var(--gray);margin-top:6px">残高：¥${myNewBal.toLocaleString()}</div>
+    <button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="closeModal();showScreen('customer-wallet')">ウォレットに戻る</button>
+  </div>`);
+}
+
+// ===== OGORU（おごる）=====
+let ogoruAmount = 0;
+let ogoruPinBuffer = '';
+
+function showOgoru() {
+  const c = STATE.customers[currentCustomerId];
+  if (!c) return;
+  ogoruAmount = 0;
+  document.getElementById('ogoru-my-balance').innerHTML = '<span>¥</span>' + (c.balance||0).toLocaleString();
+  document.getElementById('ogoru-my-name').textContent = c.name;
+  document.getElementById('ogoru-preview').style.display = 'none';
+  document.getElementById('ogoru-go-btn').style.display = 'none';
+  // ボタンリセット
+  [500,600,1000].forEach(a => {
+    const btn = document.getElementById('ogoru-btn-'+a);
+    if (btn) { btn.style.borderColor=''; btn.style.color=''; btn.style.background=''; }
+  });
+  showScreen('ogoru-screen');
+}
+
+function selectOgoruAmount(amount) {
+  ogoruAmount = amount;
+  const myBal = STATE.customers[currentCustomerId]?.balance || 0;
+  // ボタンハイライト
+  [500,600,1000].forEach(a => {
+    const btn = document.getElementById('ogoru-btn-'+a);
+    if (!btn) return;
+    if (a === amount) {
+      btn.style.borderColor = 'var(--accent)';
+      btn.style.color = 'var(--accent)';
+      btn.style.background = 'rgba(200,162,48,.1)';
+    } else {
+      btn.style.borderColor = ''; btn.style.color = ''; btn.style.background = '';
+    }
+  });
+  const preview = document.getElementById('ogoru-preview');
+  const goBtn = document.getElementById('ogoru-go-btn');
+  if (amount > myBal) {
+    preview.style.display = 'block';
+    preview.textContent = '残高不足（残高 ¥' + myBal.toLocaleString() + '）';
+    preview.style.color = '#e07060';
+    goBtn.style.display = 'none';
+  } else {
+    preview.style.display = 'block';
+    preview.style.color = 'var(--gray)';
+    preview.textContent = '送金後の残高：¥' + (myBal - amount).toLocaleString();
+    goBtn.style.display = 'block';
+  }
+}
+
+function goOgoruConfirm() {
+  if (!ogoruAmount) return;
+  const myBal = STATE.customers[currentCustomerId]?.balance || 0;
+  if (ogoruAmount > myBal) return;
+  document.getElementById('ogoru-confirm-amount').textContent = '¥' + ogoruAmount.toLocaleString();
+  document.getElementById('ogoru-confirm-after').textContent = '¥' + (myBal - ogoruAmount).toLocaleString();
+  ogoruPinBuffer = '';
+  buildOgoruPinPad();
+  showScreen('ogoru-confirm');
+}
+
+function buildOgoruPinPad() {
+  const dots = document.getElementById('ogoru-pin-dots');
+  const pad = document.getElementById('ogoru-pin-pad');
+  dots.innerHTML = [0,1,2,3].map(i =>
+    `<div style="width:14px;height:14px;border-radius:50%;background:${ogoruPinBuffer.length>i?'var(--accent)':'var(--dark3)'};border:1.5px solid var(--border);transition:all .15s"></div>`
+  ).join('');
+  pad.innerHTML = [7,8,9,4,5,6,1,2,3,'',0,'⌫'].map(k =>
+    k==='' ? '<div></div>' :
+    `<button class="pin-key" onclick="ogoruPinInput('${k}')">${k}</button>`
+  ).join('');
+}
+
+function ogoruPinInput(k) {
+  if (k === '⌫') { ogoruPinBuffer = ogoruPinBuffer.slice(0,-1); buildOgoruPinPad(); return; }
+  if (ogoruPinBuffer.length >= 4) return;
+  ogoruPinBuffer += k;
+  buildOgoruPinPad();
+  if (ogoruPinBuffer.length === 4) setTimeout(execOgoru, 200);
+}
+
+function execOgoru() {
+  const myCustomer = STATE.customers[currentCustomerId];
+  if (!myCustomer) return;
+  if (ogoruPinBuffer !== myCustomer.pin) {
+    showModal('<p style="color:#e07060;text-align:center;letter-spacing:.1em">PINが違います</p>');
+    ogoruPinBuffer = ''; buildOgoruPinPad(); return;
+  }
+  const myNewBal = (myCustomer.balance||0) - ogoruAmount;
+  const ts = Date.now();
+  // 自分の残高を減らす
+  db.ref('/customers/' + currentCustomerId + '/balance').set(myNewBal);
+  // 取引履歴
+  db.ref('/transactions').push({
+    customerId: currentCustomerId,
+    type: 'ogoru',
+    amount: ogoruAmount,
+    ts
+  });
+  // owner.html向けのおごり通知をFirebaseに書き込む
+  db.ref('/tips').push({
+    fromName: myCustomer.name,
+    amount: ogoruAmount,
+    status: 'new',
+    ts
+  });
+  showModal(`<div style="text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:12px">🍺</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.2em;color:var(--accent);margin-bottom:8px">CHEERS!</div>
+    <div style="font-family:'DM Mono',monospace;font-size:32px;color:var(--white);margin-bottom:8px">¥${ogoruAmount.toLocaleString()}</div>
+    <div style="font-size:13px;color:var(--gray);margin-bottom:4px">オーナーに1杯おごりました！</div>
+    <div style="font-size:12px;color:var(--gray)">残高：¥${myNewBal.toLocaleString()}</div>
     <button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="closeModal();showScreen('customer-wallet')">ウォレットに戻る</button>
   </div>`);
 }
@@ -1619,6 +1787,7 @@ function renderDetailTx(id) {
   if(txs.length===0){el.innerHTML=`<div class="empty-state" style="padding:24px"><p>履歴なし</p></div>`;return;}
   el.innerHTML=txs.map(t=>{
     const isIn=t.type==='charge'||t.type==='transfer_in';
+    if(t.type==='ogoru'){const iconChar='🍺';return `<div class="tx-item"><div class="tx-icon pay" style="font-size:16px">🍺</div><div class="tx-info"><div class="tx-title">おごる → オーナー</div><div class="tx-date">${dateStr(t.ts)}</div></div><div><div class="tx-amount pay">-${fmt(t.amount)}</div></div></div>`;}
     const iconChar=t.type==='charge'?'↑':t.type==='transfer_in'?'↙':t.type==='transfer_out'?'↗':'↓';
     const iconCls=isIn?'charge':'pay';
     const title=t.type==='charge'?'チャージ':t.type==='transfer_in'?`受取 ← ${t.fromName||''}`:t.type==='transfer_out'?`送金 → ${t.toName||''}`:'お支払い';
