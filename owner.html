@@ -698,7 +698,7 @@ function closeSeatModal(){
 // ===== 会計処理 =====
 function getCheckoutTargetIds(){
   const today=new Date().toDateString();
-  return Object.entries(allOrders)
+  return Object.entries(orders)
     .filter(([,o])=>
       o.seat===currentModalSeat &&
       new Date(o.ts).toDateString()===today &&
@@ -721,7 +721,7 @@ function execCheckout(){
   if(targetIds.length===0){toast('会計済みです');closeSeatModal();return;}
   let total=0;
   targetIds.forEach(id=>{
-    (allOrders[id].items||[]).forEach(it=>total+=it.price*it.qty);
+    (orders[id].items||[]).forEach(it=>total+=it.price*it.qty);
   });
   const seat=currentModalSeat;
   toast('⏳ 処理中...');
