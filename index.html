@@ -169,6 +169,33 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--black);color:var(--w
 @media(min-width:481px){
   .screen{max-width:480px;margin:0 auto;box-shadow:0 0 40px rgba(0,0,0,.5)}
 }
+
+/* ===== WALLET KEBAB MENU ===== */
+.kebab-btn{
+  width:36px;height:36px;border:none;background:none;cursor:pointer;
+  color:var(--gray);font-size:22px;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;transition:all .15s;letter-spacing:-.05em
+}
+.kebab-btn:active{background:var(--dark3);color:var(--accent2)}
+.kebab-menu{
+  position:fixed;top:58px;right:12px;z-index:200;
+  background:var(--dark2);border:1px solid var(--border2);border-radius:12px;
+  min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.5);
+  overflow:hidden;display:none
+}
+.kebab-menu.show{display:block}
+.kebab-item{
+  display:flex;align-items:center;gap:12px;padding:14px 18px;
+  font-size:14px;font-weight:700;color:var(--white);
+  font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:background .15s;
+  border-bottom:1px solid var(--border)
+}
+.kebab-item:last-child{border-bottom:none}
+.kebab-item:active{background:var(--gold-dim)}
+.kebab-item-icon{font-size:18px;flex-shrink:0;width:24px;text-align:center}
+.kebab-item.danger{color:#e07060}
+.kebab-bg{position:fixed;inset:0;z-index:199;display:none}
+.kebab-bg.show{display:block}
 </style>
 </head>
 <body>
@@ -788,21 +815,34 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--black);color:var(--w
 </div>
 
 <!-- CUSTOMER WALLET -->
+<!-- Kebab メニュー -->
+<div class="kebab-bg" id="kebab-bg" onclick="closeKebab()"></div>
+<div class="kebab-menu" id="kebab-menu">
+  <div class="kebab-item" onclick="closeKebab();showTransferScreen()">
+    <span class="kebab-item-icon">💸</span>送金する
+  </div>
+  <div class="kebab-item" onclick="closeKebab();showOgoru()">
+    <span class="kebab-item-icon">🍺</span>オーナーにおごる
+  </div>
+  <div class="kebab-item" onclick="closeKebab();document.getElementById('wallet-tx-list').scrollIntoView({behavior:'smooth'})">
+    <span class="kebab-item-icon">📋</span>取引履歴
+  </div>
+  <div class="kebab-item danger" onclick="closeKebab();showScreen('customer-select')">
+    <span class="kebab-item-icon">🚪</span>ログアウト
+  </div>
+</div>
+
 <div id="customer-wallet" class="screen">
   <div class="topbar">
     <button class="topbar-back" onclick="showScreen('customer-select')">&#8592;</button>
     <div class="topbar-title" id="wallet-customer-name">—</div>
-    <div style="width:36px"></div>
+    <button class="kebab-btn" onclick="toggleKebab()">⋮</button>
   </div>
   <div class="content">
     <div class="balance-card">
       <div class="balance-label">BALANCE</div>
       <div class="balance-amount" id="wallet-balance"><span>¥</span>0</div>
       <div class="balance-name" id="wallet-name-label">—</div>
-    </div>
-    <div style="display:flex;gap:10px;margin-bottom:4px">
-      <button onclick="showTransferScreen()" style="flex:1;padding:14px 8px;border-radius:10px;border:1.5px solid var(--border);background:var(--dark3);color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.12em;cursor:pointer;text-align:center">💸<br><span style="font-size:11px;letter-spacing:.06em;font-family:'Noto Sans JP',sans-serif;font-weight:700">送金する</span></button>
-      <button onclick="showOgoru()" style="flex:1;padding:14px 8px;border-radius:10px;border:1.5px solid var(--accent);background:rgba(200,162,48,.08);color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.12em;cursor:pointer;text-align:center">🍺<br><span style="font-size:11px;letter-spacing:.06em;font-family:'Noto Sans JP',sans-serif;font-weight:700">オーナーにおごる</span></button>
     </div>
     <div class="section-head">ボーナスポイント RANKING</div>
     <div class="ranking-card" id="dan-ranking"></div>
@@ -1353,6 +1393,16 @@ function toast(msg) {
 }
 
 // ===== MODAL =====
+// ===== KEBAB MENU =====
+function toggleKebab(){
+  document.getElementById('kebab-menu').classList.toggle('show');
+  document.getElementById('kebab-bg').classList.toggle('show');
+}
+function closeKebab(){
+  document.getElementById('kebab-menu').classList.remove('show');
+  document.getElementById('kebab-bg').classList.remove('show');
+}
+
 function showModal(html) { document.getElementById('modal-box').innerHTML=html; document.getElementById('modal-overlay').classList.add('show'); }
 function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
 function hideModal() { document.getElementById('modal-overlay').classList.remove('show'); }
