@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DNA BAR — オーナー</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
@@ -20,262 +20,135 @@
 html,body{height:100%;overflow:hidden}
 body{font-family:'Noto Sans JP',sans-serif;background:var(--black);color:var(--white);display:flex;flex-direction:column}
 
-/* ===== HEADER ===== */
-header{
-  background:var(--dark);border-bottom:1px solid var(--border);
-  height:56px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 18px;flex-shrink:0;position:relative;z-index:10
-}
+/* HEADER */
+header{background:var(--dark);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;flex-shrink:0}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.25em;color:var(--gold2)}
-.hdr-right{display:flex;align-items:center;gap:12px}
-.sync-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gray);
-  background:var(--dark3);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
-.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.dot.ok{background:var(--green2)}
-.dot.ng{background:var(--red)}
-.dot.wait{background:var(--gold);animation:blink .9s infinite}
+.sync-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gray);background:var(--dark3);border:1px solid var(--border);padding:4px 10px;border-radius:20px;cursor:pointer}
+.dot{width:7px;height:7px;border-radius:50%}
+.dot.ok{background:var(--green2)}.dot.ng{background:var(--red)}.dot.wait{background:var(--gold);animation:blink .9s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 .date-disp{font-size:11px;color:var(--gray);font-family:'DM Mono',monospace}
 
-/* ===== STATS BAR ===== */
-.stats-bar{
-  display:flex;gap:8px;padding:10px 14px;background:var(--dark2);
-  border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none
-}
+/* STATS */
+.stats-bar{display:flex;gap:8px;padding:10px 14px;background:var(--dark2);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
 .stats-bar::-webkit-scrollbar{display:none}
-.stat{
-  flex-shrink:0;background:var(--dark3);border:1px solid var(--border);
-  border-radius:8px;padding:8px 14px;min-width:100px
-}
+.stat{flex-shrink:0;background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:8px 14px;min-width:100px}
 .stat-l{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.15em;margin-bottom:3px}
 .stat-v{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--white);line-height:1}
-.stat-v.red{color:#e07060}
-.stat-v.green{color:var(--green2)}
-.stat-v.gold{color:var(--gold2)}
+.stat-v.red{color:#e07060}.stat-v.green{color:var(--green2)}.stat-v.gold{color:var(--gold2)}
 
-/* ===== FILTER BAR ===== */
-.filter-bar{
-  display:flex;align-items:center;gap:8px;padding:10px 14px;
-  background:var(--dark);border-bottom:1px solid var(--border);flex-shrink:0
-}
-.fb-btn{
-  padding:7px 14px;border-radius:6px;border:1.5px solid var(--border);
-  background:var(--dark3);color:var(--gray);font-size:12px;font-weight:700;
-  cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s;white-space:nowrap
-}
-.fb-btn.on{background:var(--gold-dim);border-color:var(--gold);color:var(--gold2)}
-.fb-btn:active{transform:scale(.95)}
-.clear-btn{
-  margin-left:auto;padding:7px 14px;border-radius:6px;border:1px solid var(--red-dim);
-  background:var(--red-dim);color:#e07060;font-size:12px;font-weight:700;
-  cursor:pointer;font-family:'Noto Sans JP',sans-serif;white-space:nowrap
-}
-.clear-btn:active{transform:scale(.95)}
-.order-count{font-size:11px;color:var(--gray);white-space:nowrap}
-
-/* ===== ORDER GRID ===== */
-.order-scroll{flex:1;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch}
-.order-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
-
-/* ===== TICKET ===== */
-.ticket{
-  background:var(--dark2);border:1.5px solid var(--border);border-radius:var(--r);
-  padding:14px;display:flex;flex-direction:column;gap:10px;
-  transition:border-color .2s,box-shadow .2s
-}
-.ticket.status-new{border-color:var(--red);box-shadow:0 0 14px rgba(192,57,43,.2);animation:pulse-new 1.2s 4}
-.ticket.status-making{border-color:var(--orange)}
-.ticket.status-done{opacity:.55;border-color:var(--gray2)}
-@keyframes pulse-new{0%,100%{box-shadow:0 0 8px rgba(192,57,43,.2)}50%{box-shadow:0 0 22px rgba(192,57,43,.45)}}
-
-.ticket-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-.ticket-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--gold2);letter-spacing:.05em;line-height:1}
-.ticket-seat{font-size:11px;color:var(--gray);margin-top:3px;letter-spacing:.06em}
-.ticket-time{font-size:10px;color:var(--gray);font-family:'DM Mono',monospace;margin-top:2px}
-
-.status-badge{
-  font-size:11px;font-weight:700;padding:4px 10px;border-radius:16px;
-  letter-spacing:.06em;white-space:nowrap;flex-shrink:0;margin-top:4px
-}
-.badge-new{background:var(--red-dim);color:#e07060;border:1px solid rgba(192,57,43,.35)}
-.badge-making{background:var(--orange-dim);color:#e0904a;border:1px solid rgba(212,105,30,.35)}
-.badge-done{background:var(--green-dim);color:#4aaa7a;border:1px solid rgba(42,154,90,.3)}
-
-.ticket-items{display:flex;flex-direction:column;gap:5px}
-.ti-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
-.ti-name{color:var(--white);flex:1}
-.ti-qty{font-family:'DM Mono',monospace;color:var(--gold);font-size:13px;font-weight:500;flex-shrink:0;margin-left:8px}
-.ti-sep{height:1px;background:var(--border);margin:2px 0}
-
-.ticket-note{
-  font-size:11px;color:var(--gray);background:var(--dark3);
-  padding:6px 10px;border-radius:6px;line-height:1.6;border-left:2px solid var(--border2)
-}
-.ticket-actions{display:flex;gap:7px;flex-wrap:wrap}
-.ta-btn{
-  flex:1;min-width:72px;padding:9px 8px;border-radius:7px;border:none;
-  font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;
-  transition:all .15s;text-align:center
-}
-.ta-btn:active{transform:scale(.95)}
-.btn-making{background:var(--orange-dim);color:#e0904a;border:1px solid rgba(212,105,30,.35)}
-.btn-making:hover{background:rgba(212,105,30,.25)}
-.btn-done{background:var(--green-dim);color:#4aaa7a;border:1px solid rgba(42,154,90,.3)}
-.btn-done:hover{background:rgba(42,154,90,.25)}
-.btn-del{background:var(--dark3);color:var(--gray);border:1px solid var(--gray2);font-size:12px;flex:0;padding:9px 12px}
-.btn-del:hover{color:#e07060;border-color:rgba(192,57,43,.35)}
-
-/* ===== EMPTY ===== */
-.empty{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  height:100%;gap:12px;color:var(--gray)
-}
-.empty-icon{font-size:3rem;opacity:.25}
-.empty-txt{font-size:14px;opacity:.6}
-
-/* ===== TOAST ===== */
-#toast{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
-  background:var(--gold);color:var(--black);padding:10px 22px;border-radius:20px;
-  font-size:13px;font-weight:700;z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);
-  white-space:nowrap;pointer-events:none;letter-spacing:.05em
-}
-#toast.show{transform:translateX(-50%) translateY(0)}
-
-/* ===== MODAL (音設定) ===== */
-.modal-bg{
-  position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
-  display:flex;align-items:center;justify-content:center;display:none
-}
-.modal-bg.show{display:flex}
-.modal{
-  background:var(--dark2);border:1px solid var(--border2);border-radius:var(--r);
-  padding:24px;width:min(360px,90vw);display:flex;flex-direction:column;gap:16px
-}
-.modal h2{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.15em;color:var(--gold2)}
-.modal label{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.12em;display:block;margin-bottom:5px}
-.modal input[type=text]{
-  width:100%;padding:9px 12px;border-radius:7px;border:1.5px solid var(--border);
-  background:var(--dark3);color:var(--white);font-size:13px;outline:none;
-  font-family:'Noto Sans JP',sans-serif
-}
-.modal input:focus{border-color:var(--gold)}
-.modal-btns{display:flex;gap:8px}
-.mbtn{flex:1;padding:11px;border-radius:7px;border:none;font-size:14px;font-weight:700;
-  cursor:pointer;font-family:'Noto Sans JP',sans-serif}
-.mbtn-ok{background:var(--gold);color:var(--black)}
-.mbtn-cancel{background:var(--dark3);color:var(--gray);border:1px solid var(--gray2)}
-
-/* ===== NEW ORDER ALERT ===== */
-#new-alert{
-  position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(140px);
-  background:var(--red);color:#fff;padding:12px 24px;border-radius:24px;
-  font-size:14px;font-weight:700;z-index:100;transition:transform .35s cubic-bezier(.34,1.56,.64,1);
-  pointer-events:none;display:flex;align-items:center;gap:8px;letter-spacing:.06em;
-  white-space:nowrap;box-shadow:0 4px 20px rgba(192,57,43,.4)
-}
-#new-alert.show{transform:translateX(-50%) translateY(0)}
-
-/* ===== FLOORPLAN ===== */
-.fp-section{
-  padding:12px 14px;background:var(--dark2);border-bottom:1px solid var(--border);flex-shrink:0
-}
-.fp-group-label{
-  font-size:9px;font-weight:700;color:var(--gray);letter-spacing:.18em;
-  text-align:center;margin-bottom:6px
-}
+/* FLOORPLAN */
+.fp-section{padding:12px 14px;background:var(--dark2);border-bottom:1px solid var(--border);flex-shrink:0}
+.fp-group-label{font-size:9px;font-weight:700;color:var(--gray);letter-spacing:.18em;text-align:center;margin-bottom:6px}
 .fp-counter-row{display:flex;gap:5px;justify-content:center;margin-bottom:10px}
 .fp-tables{display:flex;gap:8px}
 .fp-tbl{flex:1}
-.fp-tbl-label{
-  font-size:9px;font-weight:700;color:var(--gray);letter-spacing:.12em;
-  text-align:center;margin-bottom:4px
-}
+.fp-tbl-label{font-size:9px;font-weight:700;color:var(--gray);letter-spacing:.12em;text-align:center;margin-bottom:4px}
 .fp-tbl-row{display:flex;gap:4px;justify-content:center;margin-bottom:4px}
-.seat-chip{
-  flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid var(--border);
-  background:var(--dark3);font-size:11px;font-weight:700;
-  font-family:'DM Mono',monospace;color:var(--gray);letter-spacing:.03em;
-  cursor:pointer;transition:all .15s;text-align:center;min-width:36px
-}
+.seat-chip{flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid var(--border);background:var(--dark3);font-size:11px;font-weight:700;font-family:'DM Mono',monospace;color:var(--gray);cursor:pointer;transition:all .15s;text-align:center;min-width:36px}
 .seat-chip:active{transform:scale(.93)}
 .seat-chip.active{background:rgba(192,57,43,.2);border-color:rgba(192,57,43,.55);color:#e07060}
 .seat-chip.done{background:var(--green-dim);border-color:rgba(42,154,90,.3);color:#4aaa7a}
-.seat-chip.paid{background:rgba(90,90,90,.2);border-color:#333;color:#444;text-decoration:line-through}
+.seat-chip.paid{background:rgba(90,90,90,.15);border-color:#2a2a2a;color:#444}
 .fp-counter-row .seat-chip{min-width:40px;padding:8px 6px;font-size:12px}
 
-/* ===== SCROLLBAR ===== */ */
-.order-scroll::-webkit-scrollbar{width:4px}
-.order-scroll::-webkit-scrollbar-track{background:transparent}
-.order-scroll::-webkit-scrollbar-thumb{background:var(--gray2);border-radius:2px}
+/* FILTER */
+.filter-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--dark);border-bottom:1px solid var(--border);flex-shrink:0}
+.fb-btn{padding:7px 14px;border-radius:6px;border:1.5px solid var(--border);background:var(--dark3);color:var(--gray);font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;white-space:nowrap}
+.fb-btn.on{background:var(--gold-dim);border-color:var(--gold);color:var(--gold2)}
+.clear-btn{margin-left:auto;padding:7px 14px;border-radius:6px;border:1px solid var(--red-dim);background:var(--red-dim);color:#e07060;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;white-space:nowrap}
+.order-count{font-size:11px;color:var(--gray);white-space:nowrap}
 
-@media(max-width:480px){
-  .order-grid{grid-template-columns:1fr}
-  .stats-bar{gap:6px;padding:8px 10px}
-  .stat{min-width:80px;padding:7px 10px}
-  .stat-v{font-size:19px}
-  header{padding:0 12px}
-  .filter-bar,.order-scroll{padding-left:10px;padding-right:10px}
-}
+/* ORDER LIST */
+.order-scroll{flex:1;overflow-y:auto;padding:12px 14px}
+.order-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.ticket{background:var(--dark2);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
+.ticket.status-new{border-color:var(--red);box-shadow:0 0 14px rgba(192,57,43,.2);animation:pulse-new 1.2s 4}
+.ticket.status-making{border-color:var(--orange)}
+.ticket.status-done,.ticket.status-paid{opacity:.55;border-color:var(--gray2)}
+@keyframes pulse-new{0%,100%{box-shadow:0 0 8px rgba(192,57,43,.2)}50%{box-shadow:0 0 22px rgba(192,57,43,.45)}}
+.ticket-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.ticket-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--gold2);letter-spacing:.05em;line-height:1}
+.ticket-seat{font-size:11px;color:var(--gray);margin-top:3px}
+.ticket-time{font-size:10px;color:var(--gray);font-family:'DM Mono',monospace;margin-top:2px}
+.status-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:16px;letter-spacing:.06em;white-space:nowrap;flex-shrink:0;margin-top:4px}
+.badge-new{background:var(--red-dim);color:#e07060;border:1px solid rgba(192,57,43,.35)}
+.badge-making{background:var(--orange-dim);color:#e0904a;border:1px solid rgba(212,105,30,.35)}
+.badge-done{background:var(--green-dim);color:#4aaa7a;border:1px solid rgba(42,154,90,.3)}
+.badge-paid{background:rgba(90,90,90,.15);color:#666;border:1px solid #333}
+.ticket-items{display:flex;flex-direction:column;gap:5px}
+.ti-row{display:flex;justify-content:space-between;font-size:13px}
+.ti-name{color:var(--white)}
+.ti-qty{font-family:'DM Mono',monospace;color:var(--gold);font-size:13px;font-weight:500}
+.ticket-note{font-size:11px;color:var(--gray);background:var(--dark3);padding:6px 10px;border-radius:6px;border-left:2px solid var(--border2)}
+.ticket-actions{display:flex;gap:7px;flex-wrap:wrap}
+.ta-btn{flex:1;min-width:72px;padding:9px 8px;border-radius:7px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif}
+.btn-making{background:var(--orange-dim);color:#e0904a;border:1px solid rgba(212,105,30,.35)}
+.btn-done{background:var(--green-dim);color:#4aaa7a;border:1px solid rgba(42,154,90,.3)}
+.btn-del{background:var(--dark3);color:var(--gray);border:1px solid var(--gray2);font-size:12px;flex:0;padding:9px 12px}
 
-/* ===== SEAT DETAIL MODAL ===== */
-.seat-modal-bg{
-  position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;
-  display:none;align-items:flex-end;justify-content:center
-}
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:var(--gray)}
+.empty-icon{font-size:3rem;opacity:.25}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--gold);color:var(--black);padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;z-index:9999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* NEW ORDER ALERT */
+#new-alert{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(140px);background:var(--red);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:700;z-index:9999;transition:transform .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(192,57,43,.4)}
+#new-alert.show{transform:translateX(-50%) translateY(0)}
+
+/* FIREBASE CONFIG MODAL */
+.cfg-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center}
+.cfg-modal-bg.show{display:flex}
+.cfg-modal{background:var(--dark2);border:1px solid var(--border2);border-radius:var(--r);padding:24px;width:min(360px,90vw);display:flex;flex-direction:column;gap:14px}
+.cfg-modal h2{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.15em;color:var(--gold2)}
+.cfg-label{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.12em;margin-bottom:4px}
+.cfg-inp{width:100%;padding:9px 12px;border-radius:7px;border:1.5px solid var(--border);background:var(--dark3);color:var(--white);font-size:13px;outline:none;font-family:'Noto Sans JP',sans-serif}
+.cfg-inp:focus{border-color:var(--gold)}
+.cfg-btns{display:flex;gap:8px}
+.cfg-btn{flex:1;padding:11px;border-radius:7px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif}
+.cfg-btn-ok{background:var(--gold);color:var(--black)}
+.cfg-btn-cancel{background:var(--dark3);color:var(--gray);border:1px solid var(--gray2)}
+
+/* SEAT MODAL */
+.seat-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;display:none;align-items:flex-end;justify-content:center}
 .seat-modal-bg.show{display:flex}
-.seat-modal{
-  background:var(--dark2);border:1px solid var(--border2);
-  border-radius:14px 14px 0 0;width:100%;max-width:500px;
-  padding:20px 18px 32px;max-height:70vh;overflow-y:auto;
-  position:relative;z-index:201
-}
-.seat-modal-title{
-  font-family:'Bebas Neue',sans-serif;font-size:22px;
-  letter-spacing:.15em;color:var(--gold2);margin-bottom:12px
-}
-.seat-order-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
-.seat-order-name{color:var(--white);flex:1}
+.seat-modal{background:var(--dark2);border:1px solid var(--border2);border-radius:14px 14px 0 0;width:100%;max-width:500px;padding:20px 18px 32px;max-height:75vh;overflow-y:auto}
+.seat-modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.15em;color:var(--gold2);margin-bottom:12px}
+.seat-order-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+.seat-order-name{color:var(--white)}
 .seat-order-price{font-family:'DM Mono',monospace;color:var(--gold);font-size:12px}
-.seat-subtotal{
-  display:flex;justify-content:space-between;align-items:baseline;
-  border-top:1px solid var(--border);margin-top:8px;padding-top:8px
-}
+.seat-subtotal{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--border);margin-top:8px;padding-top:10px;margin-bottom:14px}
 .seat-subtotal-label{font-size:11px;color:var(--gray)}
-.seat-subtotal-val{font-family:'DM Mono',monospace;font-size:20px;color:var(--gold2);font-weight:500}
+.seat-subtotal-val{font-family:'DM Mono',monospace;font-size:22px;color:var(--gold2);font-weight:500}
 .seat-no-order{font-size:13px;color:var(--gray);padding:12px 0}
-.seat-modal-close{
-  width:100%;margin-top:14px;padding:10px;border-radius:8px;
-  border:1px solid var(--border);background:var(--dark3);color:var(--gray);
-  font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif
-}
-/* ===== PAY METHOD ===== */
-.pay-method-row{display:flex;gap:8px;margin-bottom:14px}
-.pay-method-btn{
-  flex:1;padding:12px 8px;border-radius:8px;border:1.5px solid var(--border);
-  background:var(--dark3);color:var(--gray);font-size:13px;font-weight:700;
-  cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s;
-  text-align:center;position:relative;z-index:202;pointer-events:auto
-}
-.pay-method-btn.selected{border-color:var(--gold);background:var(--gold-dim);color:var(--gold2)}
-.wallet-search-wrap{display:none;flex-direction:column;gap:8px}
-.wallet-search-wrap.show{display:flex}
-.wallet-inp{
-  width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);
-  background:var(--dark3);color:var(--white);font-size:14px;
-  font-family:'Noto Sans JP',sans-serif;outline:none
-}
+
+/* PAY METHOD */
+.pay-section-label{font-size:10px;color:var(--gold);letter-spacing:.15em;font-weight:700;margin-bottom:8px}
+.pay-method-row{display:flex;gap:8px;margin-bottom:12px}
+.pay-btn{flex:1;padding:12px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--dark3);color:var(--gray);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;text-align:center}
+.pay-btn.on{border-color:var(--gold);background:var(--gold-dim);color:var(--gold2)}
+
+/* WALLET SEARCH */
+.wallet-inp{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--dark3);color:var(--white);font-size:14px;font-family:'Noto Sans JP',sans-serif;outline:none;margin-bottom:8px}
 .wallet-inp:focus{border-color:var(--gold)}
-.wallet-result{
-  background:var(--dark3);border:1px solid var(--border);
-  border-radius:8px;padding:12px;display:none
-}
-.wallet-result.show{display:block}
-.wallet-customer-name{font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px}
-.wallet-balance{font-family:'DM Mono',monospace;font-size:22px;color:var(--gold2);font-weight:500}
-.wallet-balance.insufficient{color:#e07060}
-.wallet-balance-label{font-size:10px;color:var(--gray);letter-spacing:.1em;margin-bottom:2px}
+.wallet-result-box{background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;display:none}
+.wallet-result-box.show{display:block}
+.wallet-cname{font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px}
+.wallet-bal{font-family:'DM Mono',monospace;font-size:22px;color:var(--gold2);font-weight:500}
+.wallet-bal.ng{color:#e07060}
 .wallet-after{font-size:11px;color:var(--gray);margin-top:4px}
+
+/* CONFIRM BUTTONS */
+.seat-modal-btns{display:flex;gap:8px;margin-top:4px}
+.seat-btn{flex:1;padding:12px;border-radius:8px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif}
+.seat-btn-cancel{background:var(--dark3);color:var(--gray);border:1px solid var(--gray2)}
+.seat-btn-ok{background:var(--gold);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.12em}
+.seat-btn-close{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--dark3);color:var(--gray);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-top:10px}
+
+@media(max-width:480px){.order-grid{grid-template-columns:1fr}.stats-bar{gap:6px;padding:8px 10px}.stat{min-width:80px;padding:7px 10px}.stat-v{font-size:19px}}
 </style>
 </head>
 <body>
@@ -283,142 +156,83 @@ header{
 <div id="new-alert">🔔 新しい注文が入りました！</div>
 <div id="toast"></div>
 
-<!-- 設定モーダル -->
-<div class="modal-bg" id="modal-bg">
-  <div class="modal">
+<!-- Firebase設定モーダル -->
+<div class="cfg-modal-bg" id="cfg-modal-bg">
+  <div class="cfg-modal">
     <h2>Firebase 設定</h2>
-    <div>
-      <label>DATABASE URL</label>
-      <input type="text" id="cfg-url" placeholder="https://xxx-default-rtdb.firebaseio.com">
+    <div><div class="cfg-label">DATABASE URL</div><input class="cfg-inp" id="cfg-url" type="text"></div>
+    <div><div class="cfg-label">API KEY</div><input class="cfg-inp" id="cfg-key" type="text"></div>
+    <div class="cfg-btns">
+      <button class="cfg-btn cfg-btn-cancel" onclick="closeCfgModal()">キャンセル</button>
+      <button class="cfg-btn cfg-btn-ok" onclick="saveAndConnect()">接続する</button>
     </div>
-    <div>
-      <label>API KEY</label>
-      <input type="text" id="cfg-key" placeholder="AIzaSy...">
+  </div>
+</div>
+
+<!-- 席モーダル -->
+<div class="seat-modal-bg" id="seat-modal-bg">
+  <div class="seat-modal" id="seat-modal-inner">
+    <div class="seat-modal-title" id="smt-title">🪑 —</div>
+    <div id="smt-body"></div>
+    <!-- 会計エリア（注文ありの時だけ表示） -->
+    <div id="smt-pay-area" style="display:none">
+      <div class="pay-section-label">支払い方法</div>
+      <div class="pay-method-row">
+        <button class="pay-btn on" id="pay-cash" onclick="setPayMethod('cash')">💵 現金 / カード</button>
+        <button class="pay-btn" id="pay-wallet" onclick="setPayMethod('wallet')">💳 WALLET払い</button>
+      </div>
+      <div id="wallet-area" style="display:none">
+        <input class="wallet-inp" id="wallet-inp" type="text" placeholder="お客さんの名前で検索..." oninput="searchWallet(this.value)">
+        <div class="wallet-result-box" id="wallet-result-box">
+          <div class="wallet-cname" id="w-name">—</div>
+          <div style="font-size:9px;color:var(--gray);letter-spacing:.1em;margin-bottom:2px">BALANCE</div>
+          <div class="wallet-bal" id="w-bal">¥0</div>
+          <div class="wallet-after" id="w-after"></div>
+        </div>
+      </div>
+      <div class="seat-modal-btns">
+        <button class="seat-btn seat-btn-cancel" onclick="closeSeatModal()">キャンセル</button>
+        <button class="seat-btn seat-btn-ok" onclick="doCheckout()">💴 会計確定</button>
+      </div>
     </div>
-    <div class="modal-btns">
-      <button class="mbtn mbtn-cancel" onclick="closeModal()">キャンセル</button>
-      <button class="mbtn mbtn-ok" onclick="saveAndConnect()">接続する</button>
-    </div>
+    <button class="seat-btn-close" onclick="closeSeatModal()">閉じる</button>
   </div>
 </div>
 
 <!-- ヘッダー -->
 <header>
   <div class="logo">◆ DNA BAR</div>
-  <div class="hdr-right">
+  <div style="display:flex;align-items:center;gap:12px">
     <div class="date-disp" id="date-disp"></div>
-    <div class="sync-pill" onclick="openModal()" style="cursor:pointer">
+    <div class="sync-pill" onclick="openCfgModal()">
       <span class="dot wait" id="sync-dot"></span>
       <span id="sync-txt">未接続</span>
     </div>
   </div>
 </header>
 
-<!-- 統計バー -->
+<!-- 統計 -->
 <div class="stats-bar">
-  <div class="stat">
-    <div class="stat-l">本日の注文</div>
-    <div class="stat-v" id="s-total">—</div>
-  </div>
-  <div class="stat">
-    <div class="stat-l">未対応</div>
-    <div class="stat-v red" id="s-new">—</div>
-  </div>
-  <div class="stat">
-    <div class="stat-l">作成中</div>
-    <div class="stat-v" style="color:#e0904a" id="s-making">—</div>
-  </div>
-  <div class="stat">
-    <div class="stat-l">完了</div>
-    <div class="stat-v green" id="s-done">—</div>
-  </div>
-  <div class="stat">
-    <div class="stat-l">会計済み</div>
-    <div class="stat-v" style="color:#888" id="s-paid">—</div>
-  </div>
-  <div class="stat">
-    <div class="stat-l">本日の売上</div>
-    <div class="stat-v gold" id="s-sales">—</div>
-  </div>
+  <div class="stat"><div class="stat-l">本日の注文</div><div class="stat-v" id="s-total">—</div></div>
+  <div class="stat"><div class="stat-l">未対応</div><div class="stat-v red" id="s-new">—</div></div>
+  <div class="stat"><div class="stat-l">作成中</div><div class="stat-v" style="color:#e0904a" id="s-making">—</div></div>
+  <div class="stat"><div class="stat-l">完了</div><div class="stat-v green" id="s-done">—</div></div>
+  <div class="stat"><div class="stat-l">会計済み</div><div class="stat-v" style="color:#888" id="s-paid">—</div></div>
+  <div class="stat"><div class="stat-l">本日の売上</div><div class="stat-v gold" id="s-sales">—</div></div>
 </div>
 
-<!-- 席状況 平面図 -->
+<!-- 平面図 -->
 <div class="fp-section">
   <div class="fp-group-label">COUNTER</div>
   <div class="fp-counter-row" id="fp-counter"></div>
   <div class="fp-tables">
-    <div class="fp-tbl">
-      <div class="fp-tbl-label">TABLE A</div>
-      <div class="fp-tbl-row" id="fp-ta-top"></div>
-      <div class="fp-tbl-row" id="fp-ta-btm"></div>
-    </div>
-    <div class="fp-tbl">
-      <div class="fp-tbl-label">TABLE B</div>
-      <div class="fp-tbl-row" id="fp-tb-top"></div>
-      <div class="fp-tbl-row" id="fp-tb-btm"></div>
-    </div>
-    <div class="fp-tbl">
-      <div class="fp-tbl-label">TABLE C</div>
-      <div class="fp-tbl-row" id="fp-tc-top"></div>
-      <div class="fp-tbl-row" id="fp-tc-btm"></div>
-    </div>
+    <div class="fp-tbl"><div class="fp-tbl-label">TABLE A</div><div class="fp-tbl-row" id="fp-ta-top"></div><div class="fp-tbl-row" id="fp-ta-btm"></div></div>
+    <div class="fp-tbl"><div class="fp-tbl-label">TABLE B</div><div class="fp-tbl-row" id="fp-tb-top"></div><div class="fp-tbl-row" id="fp-tb-btm"></div></div>
+    <div class="fp-tbl"><div class="fp-tbl-label">TABLE C</div><div class="fp-tbl-row" id="fp-tc-top"></div><div class="fp-tbl-row" id="fp-tc-btm"></div></div>
   </div>
 </div>
 
-<!-- 席別注文モーダル -->
-<div class="seat-modal-bg" id="seat-modal-bg" onclick="if(event.target===document.getElementById('seat-modal-bg'))closeSeatModal()">
-  <div class="seat-modal">
-    <div class="seat-modal-title" id="seat-modal-title">🪑 C1</div>
-    <div id="seat-modal-body"></div>
-    <div id="seat-modal-actions" style="display:none;margin-top:14px">
-      <!-- Step1: 会計ボタン -->
-      <div id="checkout-btn-wrap">
-        <button onclick="showCheckoutConfirm()" style="
-          width:100%;padding:14px;border-radius:8px;border:none;
-          background:var(--gold);color:var(--black);
-          font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.18em;cursor:pointer">
-          💴 会計する
-        </button>
-      </div>
-      <!-- Step2: 支払い方法選択 -->
-      <div id="checkout-confirm-wrap" style="display:none">
-        <div style="font-size:10px;color:var(--gold);letter-spacing:.15em;font-weight:700;margin-bottom:8px">支払い方法</div>
-        <div class="pay-method-row">
-          <button class="pay-method-btn selected" id="pay-cash-btn" onclick="selectPayMethod('cash')">💵 現金 / カード</button>
-          <button class="pay-method-btn" id="pay-wallet-btn" onclick="selectPayMethod('wallet')">💳 WALLET払い</button>
-        </div>
-        <!-- WALLET検索エリア -->
-        <div class="wallet-search-wrap" id="wallet-search-wrap">
-          <input class="wallet-inp" id="wallet-search-inp" placeholder="お客さんの名前で検索..." oninput="searchWallet(this.value)">
-          <div class="wallet-result" id="wallet-result">
-            <div class="wallet-customer-name" id="wc-name">—</div>
-            <div class="wallet-balance-label">BALANCE</div>
-            <div class="wallet-balance" id="wc-balance">¥0</div>
-            <div class="wallet-after" id="wc-after"></div>
-          </div>
-        </div>
-        <!-- 確定ボタン -->
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button onclick="hideCheckoutConfirm()" style="
-            flex:1;padding:12px;border-radius:8px;border:1px solid var(--border);
-            background:var(--dark3);color:var(--gray);font-size:14px;font-weight:700;
-            cursor:pointer;font-family:'Noto Sans JP',sans-serif">
-            キャンセル
-          </button>
-          <button onclick="execCheckout()" id="checkout-exec-btn" style="
-            flex:1;padding:12px;border-radius:8px;border:none;
-            background:var(--gold);color:var(--black);font-size:14px;font-weight:700;
-            cursor:pointer;font-family:'Bebas Neue',sans-serif;letter-spacing:.1em">
-            ✅ 会計確定
-          </button>
-        </div>
-      </div>
-    </div>
-    <button class="seat-modal-close" onclick="closeSeatModal()">閉じる</button>
-  </div>
-</div>
-
-<!-- フィルターバー -->
+<!-- フィルター -->
 <div class="filter-bar">
   <button class="fb-btn on" id="f-all" onclick="setFilter('all')">すべて</button>
   <button class="fb-btn" id="f-active" onclick="setFilter('active')">🔴 未対応・作成中</button>
@@ -430,13 +244,7 @@ header{
 <!-- 注文リスト -->
 <div class="order-scroll">
   <div class="order-grid" id="order-grid">
-    <div class="empty">
-      <div class="empty-icon">🍹</div>
-      <div class="empty-txt">Firebaseに接続すると注文が表示されます</div>
-      <button onclick="openModal()" style="margin-top:8px;padding:10px 20px;border-radius:8px;border:1px solid var(--border2);background:var(--gold-dim);color:var(--gold2);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif">
-        ⚙ Firebase 設定
-      </button>
-    </div>
+    <div class="empty"><div class="empty-icon">🍹</div><p style="font-size:13px">接続ボタンをタップして Firebase に接続してください</p></div>
   </div>
 </div>
 
@@ -444,495 +252,402 @@ header{
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script>
 // ===== 設定 =====
-const CFG_KEY='dna-owner-cfg';
-let cfg={
-  url:'https://dna-wallet-57c0a-default-rtdb.firebaseio.com',
-  key:'AIzaSyCxLwJZKjbo-ucomVbAD1_LJxhL5SSYDpc'
+const CFG_KEY = 'dna-owner-cfg-v2';
+let cfg = {
+  url: 'https://dna-wallet-57c0a-default-rtdb.firebaseio.com',
+  key: 'AIzaSyCxLwJZKjbo-ucomVbAD1_LJxhL5SSYDpc'
 };
-try{const s=localStorage.getItem(CFG_KEY);if(s)cfg={...cfg,...JSON.parse(s)};}catch(e){}
+try { const s = localStorage.getItem(CFG_KEY); if (s) cfg = {...cfg, ...JSON.parse(s)}; } catch(e) {}
 
 // ===== 状態 =====
-let db=null,fbApp=null,listener=null;
-let orders={};
-let filter='all';
-let prevCount=0;
-let connected=false;
+let db = null;
+let orders = {};
+let customers = {};
+let filter = 'all';
+let isFirstLoad = true;
+let currentSeat = '';
+let payMethod = 'cash';
+let selectedCustomerId = null;
 
-// ===== 日時表示 =====
-function updateClock(){
-  const n=new Date();
-  const d=`${n.getMonth()+1}/${n.getDate()}`;
-  const t=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
-  document.getElementById('date-disp').textContent=d+' '+t;
+// ===== 時計 =====
+function updateClock() {
+  const n = new Date();
+  document.getElementById('date-disp').textContent =
+    (n.getMonth()+1)+'/'+n.getDate()+' '+
+    String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
 }
-updateClock();setInterval(updateClock,30000);
+updateClock();
+setInterval(updateClock, 30000);
 
-// ===== TOAST =====
+// ===== Toast =====
 let tTimer;
-function toast(msg,dur=2200){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.classList.add('show');
-  clearTimeout(tTimer);tTimer=setTimeout(()=>el.classList.remove('show'),dur);
-}
-
-// ===== NEW ORDER ALERT =====
-let alertTimer;
-function showNewAlert(){
-  const el=document.getElementById('new-alert');
+function toast(msg, dur=2400) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
   el.classList.add('show');
-  clearTimeout(alertTimer);alertTimer=setTimeout(()=>el.classList.remove('show'),3500);
-  // 音（ビープ）
-  try{
-    const ac=new(window.AudioContext||window.webkitAudioContext)();
-    [0,180,360].forEach(d=>{
-      setTimeout(()=>{
-        const o=ac.createOscillator(),g=ac.createGain();
-        o.connect(g);g.connect(ac.destination);
-        o.frequency.value=880;g.gain.setValueAtTime(.3,ac.currentTime);
-        g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.18);
-        o.start();o.stop(ac.currentTime+.18);
-      },d);
-    });
-  }catch(e){}
+  clearTimeout(tTimer);
+  tTimer = setTimeout(() => el.classList.remove('show'), dur);
 }
 
-// ===== FIREBASE =====
-function connect(){
-  setSyncStatus('wait','接続中...');
-  try{
-    // 既存アプリがあればそのまま使う、なければ初期化
-    let app;
-    if(firebase.apps.length>0){
-      app=firebase.apps[0];
-    } else {
-      app=firebase.initializeApp({
-        apiKey:cfg.key,
-        databaseURL:cfg.url,
-        appId:'1:499466077674:web:c0fffd682b9bb4008a1e93'
-      });
+// ===== New Order Alert =====
+let alertTimer;
+function showAlert() {
+  // 音
+  try {
+    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    [0,200,400].forEach(d => setTimeout(() => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.frequency.value = 880;
+      g.gain.setValueAtTime(.3, ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001, ac.currentTime+.18);
+      o.start(); o.stop(ac.currentTime+.18);
+    }, d));
+  } catch(e) {}
+  const el = document.getElementById('new-alert');
+  el.classList.add('show');
+  clearTimeout(alertTimer);
+  alertTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ===== Firebase =====
+function setSyncStatus(state, txt) {
+  document.getElementById('sync-dot').className = 'dot ' + state;
+  document.getElementById('sync-txt').textContent = txt;
+}
+
+function connect() {
+  setSyncStatus('wait', '接続中...');
+  try {
+    // 既存アプリを削除
+    while (firebase.apps.length) {
+      firebase.apps[0].delete();
     }
-    db=app.database();
-    startListener();
-    startWalletListener();
-  }catch(e){
-    setSyncStatus('ng','接続失敗');
-    toast('接続失敗: '+e.message);
-  }
+  } catch(e) {}
+  setTimeout(() => {
+    try {
+      const app = firebase.initializeApp({
+        apiKey: cfg.key,
+        databaseURL: cfg.url,
+        appId: '1:499466077674:web:c0fffd682b9bb4008a1e93'
+      });
+      db = app.database();
+      startListeners();
+      setSyncStatus('ok', '同期中');
+    } catch(e) {
+      setSyncStatus('ng', '接続失敗');
+      toast('接続失敗: ' + e.message);
+    }
+  }, 100);
 }
 
-function startListener(){
-  if(!db)return;
-  if(listener)db.ref('/orders').off('value',listener);
-  listener=db.ref('/orders').on('value',snap=>{
-    setSyncStatus('ok','同期中');
-    const isFirst=Object.keys(orders).length===0;
-    const prevNew=Object.values(orders).filter(o=>o.status==='new').length;
-    orders=snap.val()||{};
-    const curNew=Object.values(orders).filter(o=>o.status==='new').length;
-    // 初回読み込みは除外、新規注文が増えた時だけアラート
-    if(!isFirst&&curNew>prevNew)showNewAlert();
-    render();
-    updateStats();
-  },()=>{
-    setSyncStatus('ng','オフライン');
+function startListeners() {
+  if (!db) return;
+  // 注文リスナー
+  db.ref('/orders').on('value', snap => {
+    const newOrders = snap.val() || {};
+    if (!isFirstLoad) {
+      const prevNewCount = Object.values(orders).filter(o => o.status === 'new').length;
+      const curNewCount = Object.values(newOrders).filter(o => o.status === 'new').length;
+      if (curNewCount > prevNewCount) showAlert();
+    }
+    isFirstLoad = false;
+    orders = newOrders;
+    renderOrders();
+    renderStats();
+    renderFloorplan();
+  }, () => setSyncStatus('ng', 'オフライン'));
+
+  // 顧客リスナー（WALLET連携）
+  db.ref('/customers').on('value', snap => {
+    customers = snap.val() || {};
   });
-}
-
-function setSyncStatus(state,txt){
-  const dot=document.getElementById('sync-dot');
-  const label=document.getElementById('sync-txt');
-  dot.className='dot '+state;
-  label.textContent=txt;
-  connected=state==='ok';
 }
 
 // ===== 注文操作 =====
-function setStatus(id,status){
-  if(!db){toast('未接続');return;}
-  db.ref(`/orders/${id}`).update({status});
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function timeStr(ts) {
+  const d = new Date(ts);
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
 }
-function delOrder(id){
-  if(!db){toast('未接続');return;}
-  db.ref(`/orders/${id}`).remove();
+function setStatus(id, status) {
+  if (!db) { toast('未接続'); return; }
+  db.ref('/orders/' + id + '/status').set(status);
 }
-function clearDone(){
-  if(!db){toast('未接続');return;}
-  const today=new Date().toDateString();
-  let count=0;
-  Object.entries(orders).forEach(([id,o])=>{
-    if((o.status==='done'||o.status==='paid')&&new Date(o.ts).toDateString()===today){
-      db.ref(`/orders/${id}`).remove();count++;
-    }
+function delOrder(id) {
+  if (!db) return;
+  if (confirm('削除しますか？')) db.ref('/orders/' + id).remove();
+}
+function clearDone() {
+  if (!db) return;
+  const today = new Date().toDateString();
+  Object.entries(orders).forEach(([id, o]) => {
+    if ((o.status==='done'||o.status==='paid') && new Date(o.ts).toDateString()===today)
+      db.ref('/orders/'+id).remove();
   });
-  toast(count?`✅ 完了${count}件を削除`:'削除する注文がありません');
+  toast('完了・会計済みを削除しました');
 }
 
 // ===== フィルター =====
-function setFilter(f){
-  filter=f;
-  ['all','active','done'].forEach(k=>{
-    document.getElementById('f-'+k).classList.toggle('on',k===f);
-  });
-  render();
+function setFilter(f) {
+  filter = f;
+  ['all','active','done'].forEach(k =>
+    document.getElementById('f-'+k).classList.toggle('on', k===f));
+  renderOrders();
 }
 
-// ===== レンダリング =====
-function timeStr(ts){
-  const d=new Date(ts);
-  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-}
-function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-function render(){
-  const grid=document.getElementById('order-grid');
-  const today=new Date().toDateString();
-
-  let entries=Object.entries(orders)
-    .filter(([,o])=>new Date(o.ts).toDateString()===today)
-    .sort((a,b)=>{
-      // 新規→作成中→完了の順、同じステータスなら時間順
-      const rank={new:0,making:1,done:2};
-      const ra=rank[a[1].status]??1,rb=rank[b[1].status]??1;
-      if(ra!==rb)return ra-rb;
-      return a[1].ts-b[1].ts;
+// ===== 注文レンダリング =====
+function renderOrders() {
+  const grid = document.getElementById('order-grid');
+  const today = new Date().toDateString();
+  let entries = Object.entries(orders)
+    .filter(([,o]) => new Date(o.ts).toDateString() === today)
+    .sort((a,b) => {
+      const rank = {new:0, making:1, done:2, paid:3};
+      const ra = rank[a[1].status]??1, rb = rank[b[1].status]??1;
+      return ra!==rb ? ra-rb : a[1].ts-b[1].ts;
     });
-
-  if(filter==='active')entries=entries.filter(([,o])=>o.status!=='done');
-  if(filter==='done')entries=entries.filter(([,o])=>o.status==='done'||o.status==='paid');
-
-  document.getElementById('order-count').textContent=entries.length+'件表示';
-
-  if(entries.length===0){
-    grid.innerHTML=`<div class="empty">
-      <div class="empty-icon">🍹</div>
-      <div class="empty-txt">${connected?'該当する注文がありません':'Firebaseに接続してください'}</div>
-      ${!connected?`<button onclick="openModal()" style="margin-top:8px;padding:10px 20px;border-radius:8px;border:1px solid var(--border2);background:var(--gold-dim);color:var(--gold2);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif">⚙ Firebase 設定</button>`:''}
-    </div>`;
+  if (filter==='active') entries = entries.filter(([,o]) => o.status==='new'||o.status==='making');
+  if (filter==='done') entries = entries.filter(([,o]) => o.status==='done'||o.status==='paid');
+  document.getElementById('order-count').textContent = entries.length + '件';
+  if (!entries.length) {
+    grid.innerHTML = '<div class="empty"><div class="empty-icon">🍹</div><p style="font-size:13px;margin-top:8px">該当する注文がありません</p></div>';
     return;
   }
-
-  grid.innerHTML=entries.map(([id,o])=>{
-    const st=o.status||'new';
-    const badgeClass=st==='new'?'badge-new':st==='making'?'badge-making':st==='paid'?'badge-green':'badge-done';
-    const badgeTxt=st==='new'?'🔴 新規':st==='making'?'🔧 作成中':st==='paid'?'💴 会計済':'✅ 完了';
-    const items=(o.items||[]).map(it=>`
-      <div class="ti-row">
-        <span class="ti-name">${esc(it.name)}</span>
-        <span class="ti-qty">×${it.qty}</span>
-      </div>`).join('');
-    const makingBtn=st!=='making'&&st!=='done'
-      ?`<button class="ta-btn btn-making" onclick="setStatus('${id}','making')">🔧 作成中</button>`:'';
-    const doneBtn=st!=='done'
-      ?`<button class="ta-btn btn-done" onclick="setStatus('${id}','done')">✅ 完了</button>`:'';
-
-    return `<div class="ticket status-${st}" id="tk-${id}">
+  const badgeInfo = {
+    new: ['badge-new','🔴 新規'],
+    making: ['badge-making','🔧 作成中'],
+    done: ['badge-done','✅ 完了'],
+    paid: ['badge-paid','💴 会計済']
+  };
+  grid.innerHTML = '<div class="order-grid">' + entries.map(([id,o]) => {
+    const st = o.status||'new';
+    const [bc, bt] = badgeInfo[st]||['badge-new','新規'];
+    const seatColor = (!o.seat||o.seat==='席番号なし') ? 'color:#e07060;font-weight:700' : '';
+    const seatTxt = (!o.seat||o.seat==='席番号なし') ? '⚠ 席番号未入力' : esc(o.seat);
+    const items = (o.items||[]).map(it =>
+      `<div class="ti-row"><span class="ti-name">${esc(it.name)}</span><span class="ti-qty">×${it.qty}</span></div>`
+    ).join('');
+    const makingBtn = (st!=='making'&&st!=='done'&&st!=='paid') ?
+      `<button class="ta-btn btn-making" onclick="setStatus('${id}','making')">🔧 作成中</button>` : '';
+    const doneBtn = (st!=='done'&&st!=='paid') ?
+      `<button class="ta-btn btn-done" onclick="setStatus('${id}','done')">✅ 完了</button>` : '';
+    return `<div class="ticket status-${st}">
       <div class="ticket-head">
         <div>
           <div class="ticket-num">#${o.orderNum||'?'}</div>
-          <div class="ticket-seat" style="${(!o.seat||o.seat==='席番号なし')?'color:#e07060;font-weight:700':''}">
-            🪑 ${(!o.seat||o.seat==='席番号なし')?'⚠ 席番号未入力':esc(o.seat)}
-          </div>
+          <div class="ticket-seat" style="${seatColor}">🪑 ${seatTxt}</div>
           <div class="ticket-time">${timeStr(o.ts)}</div>
         </div>
-        <span class="status-badge ${badgeClass}">${badgeTxt}</span>
+        <span class="status-badge ${bc}">${bt}</span>
       </div>
       <div class="ticket-items">${items}</div>
       ${o.note?`<div class="ticket-note">📝 ${esc(o.note)}</div>`:''}
       <div class="ticket-actions">
-        ${makingBtn}
-        ${doneBtn}
-        <button class="ta-btn btn-del" onclick="if(confirm('削除しますか？'))delOrder('${id}')">削除</button>
+        ${makingBtn}${doneBtn}
+        <button class="ta-btn btn-del" onclick="delOrder('${id}')">削除</button>
       </div>
     </div>`;
-  }).join('');
+  }).join('') + '</div>';
 }
 
 // ===== 統計 =====
-function updateStats(){
-  const today=new Date().toDateString();
-  const todayOrders=Object.values(orders).filter(o=>new Date(o.ts).toDateString()===today);
-  const newC=todayOrders.filter(o=>o.status==='new').length;
-  const makingC=todayOrders.filter(o=>o.status==='making').length;
-  const doneC=todayOrders.filter(o=>o.status==='done').length;
-  const paidC=todayOrders.filter(o=>o.status==='paid').length;
-  const sales=todayOrders.filter(o=>o.status==='done'||o.status==='paid')
+function renderStats() {
+  const today = new Date().toDateString();
+  const t = Object.values(orders).filter(o => new Date(o.ts).toDateString()===today);
+  const sales = t.filter(o=>o.status==='done'||o.status==='paid')
     .reduce((s,o)=>s+(o.items||[]).reduce((ss,it)=>ss+(it.price||0)*it.qty,0),0);
-  document.getElementById('s-total').textContent=todayOrders.length;
-  document.getElementById('s-new').textContent=newC;
-  document.getElementById('s-making').textContent=makingC;
-  document.getElementById('s-done').textContent=doneC;
-  const sPaid=document.getElementById('s-paid');
-  if(sPaid)sPaid.textContent=paidC;
-  document.getElementById('s-sales').textContent='¥'+sales.toLocaleString();
-  updateSeatStatus(todayOrders);
+  document.getElementById('s-total').textContent = t.length;
+  document.getElementById('s-new').textContent = t.filter(o=>o.status==='new').length;
+  document.getElementById('s-making').textContent = t.filter(o=>o.status==='making').length;
+  document.getElementById('s-done').textContent = t.filter(o=>o.status==='done').length;
+  document.getElementById('s-paid').textContent = t.filter(o=>o.status==='paid').length;
+  document.getElementById('s-sales').textContent = '¥'+sales.toLocaleString();
 }
 
-// 席ごとの注文データを保持
-let seatOrdersCache={};
-
-function updateSeatStatus(todayOrders){
-  // 席ごとに注文を集約
-  seatOrdersCache={};
-  const today2=new Date().toDateString();
-  todayOrders.forEach(o=>{
-    const s=o.seat||'';
-    if(!s||s==='席番号なし')return;
-    if(new Date(o.ts).toDateString()!==today2)return;
-    if(!seatOrdersCache[s])seatOrdersCache[s]=[];
-    seatOrdersCache[s].push(o);
+// ===== 平面図 =====
+function renderFloorplan() {
+  const today = new Date().toDateString();
+  const seatMap = {};
+  Object.values(orders).forEach(o => {
+    if (!o.seat||o.seat==='席番号なし') return;
+    if (new Date(o.ts).toDateString()!==today) return;
+    const cur = seatMap[o.seat];
+    const rank = {new:3,making:2,done:1,paid:0};
+    if (!cur || (rank[o.status]||0) > (rank[cur]||0)) seatMap[o.seat] = o.status;
   });
-
-  // ステータス判定（new/making>done>paid>空）
-  function seatStatus(s){
-    const list=seatOrdersCache[s]||[];
-    const today=new Date().toDateString();
-    const todayList=list.filter(o=>new Date(o.ts).toDateString()===today);
-    if(todayList.some(o=>o.status==='new'))return 'active';
-    if(todayList.some(o=>o.status==='making'))return 'active';
-    if(todayList.some(o=>o.status==='done'))return 'done';
-    if(todayList.some(o=>o.status==='paid'))return 'paid';
-    return '';
-  }
-
-  function chip(s){
-    const cls=seatStatus(s);
+  function chip(s) {
+    const st = seatMap[s]||'';
+    const cls = (st==='new'||st==='making') ? 'active' : st==='done' ? 'done' : st==='paid' ? 'paid' : '';
     return `<div class="seat-chip ${cls}" onclick="openSeatModal('${s}')">${s}</div>`;
   }
-
-  // カウンター
-  const cnt=document.getElementById('fp-counter');
-  if(cnt)cnt.innerHTML=['C1','C2','C3','C4','C5','C6','C7'].map(chip).join('');
-
-  // テーブルA B C（平面図通り上段1-3・下段6-5-4）
-  [['ta','TA'],['tb','TB'],['tc','TC']].forEach(([key,pref])=>{
-    const top=document.getElementById('fp-'+key+'-top');
-    const btm=document.getElementById('fp-'+key+'-btm');
-    if(top)top.innerHTML=[1,2,3].map(n=>chip(pref+n)).join('');
-    if(btm)btm.innerHTML=[6,5,4].map(n=>chip(pref+n)).join('');
+  const cnt = document.getElementById('fp-counter');
+  if (cnt) cnt.innerHTML = [1,2,3,4,5,6,7].map(n=>chip('C'+n)).join('');
+  [['ta','TA'],['tb','TB'],['tc','TC']].forEach(([k,p]) => {
+    const top = document.getElementById('fp-'+k+'-top');
+    const btm = document.getElementById('fp-'+k+'-btm');
+    if (top) top.innerHTML = [1,2,3].map(n=>chip(p+n)).join('');
+    if (btm) btm.innerHTML = [6,5,4].map(n=>chip(p+n)).join('');
   });
 }
 
-// ===== 席別注文モーダル =====
-let currentModalSeat='';
+// ===== 席モーダル =====
+function openSeatModal(seat) {
+  currentSeat = seat;
+  payMethod = 'cash';
+  selectedCustomerId = null;
+  // UIリセット
+  document.getElementById('pay-cash').classList.add('on');
+  document.getElementById('pay-wallet').classList.remove('on');
+  document.getElementById('wallet-area').style.display = 'none';
+  document.getElementById('wallet-inp').value = '';
+  document.getElementById('wallet-result-box').classList.remove('show');
 
-function openSeatModal(seat){
-  currentModalSeat=seat;
-  const orders=seatOrdersCache[seat]||[];
-  const today=new Date().toDateString();
-  const todayOrders=orders.filter(o=>new Date(o.ts).toDateString()===today);
-  const activeOrders=todayOrders.filter(o=>o.status!=='paid');
-  const unpaidOrders=activeOrders.filter(o=>o.status!=='paid');
+  const today = new Date().toDateString();
+  const seatOrders = Object.values(orders).filter(o =>
+    o.seat===seat && new Date(o.ts).toDateString()===today && o.status!=='paid'
+  );
 
-  document.getElementById('seat-modal-title').textContent='🪑 '+seat;
+  document.getElementById('smt-title').textContent = '🪑 ' + seat;
+  const payArea = document.getElementById('smt-pay-area');
 
-  if(todayOrders.length===0){
-    document.getElementById('seat-modal-body').innerHTML=
-      '<div class="seat-no-order">注文なし（空席）</div>';
-    document.getElementById('seat-modal-actions').style.display='none';
+  if (!seatOrders.length) {
+    document.getElementById('smt-body').innerHTML = '<div class="seat-no-order">注文なし（空席または会計済み）</div>';
+    payArea.style.display = 'none';
   } else {
-    // 未会計の注文を集計
-    const itemMap={};
-    let subtotal=0;
-    unpaidOrders.forEach(o=>{
-      (o.items||[]).forEach(it=>{
-        if(!itemMap[it.name])itemMap[it.name]={price:it.price,qty:0};
-        itemMap[it.name].qty+=it.qty;
-        subtotal+=it.price*it.qty;
+    const itemMap = {};
+    let total = 0;
+    seatOrders.forEach(o => {
+      (o.items||[]).forEach(it => {
+        if (!itemMap[it.name]) itemMap[it.name] = {price:it.price, qty:0};
+        itemMap[it.name].qty += it.qty;
+        total += it.price * it.qty;
       });
     });
-
-    if(Object.keys(itemMap).length===0){
-      document.getElementById('seat-modal-body').innerHTML=
-        '<div class="seat-no-order" style="color:#4aaa7a">✅ 会計済み</div>';
-      document.getElementById('seat-modal-actions').style.display='none';
-    } else {
-      const rows=Object.entries(itemMap).map(([name,it])=>`
-        <div class="seat-order-row">
-          <span class="seat-order-name">${esc(name)} ×${it.qty}</span>
-          <span class="seat-order-price">¥${(it.price*it.qty).toLocaleString()}</span>
-        </div>`).join('');
-      document.getElementById('seat-modal-body').innerHTML=
-        rows+`<div class="seat-subtotal">
-          <span class="seat-subtotal-label">合計</span>
-          <span class="seat-subtotal-val">¥${subtotal.toLocaleString()}</span>
-        </div>`;
-      document.getElementById('seat-modal-actions').style.display='block';
-    }
+    const rows = Object.entries(itemMap).map(([n,it]) =>
+      `<div class="seat-order-row"><span class="seat-order-name">${esc(n)} ×${it.qty}</span><span class="seat-order-price">¥${(it.price*it.qty).toLocaleString()}</span></div>`
+    ).join('');
+    document.getElementById('smt-body').innerHTML = rows +
+      `<div class="seat-subtotal"><span class="seat-subtotal-label">合計</span><span class="seat-subtotal-val">¥${total.toLocaleString()}</span></div>`;
+    payArea.style.display = 'block';
   }
   document.getElementById('seat-modal-bg').classList.add('show');
 }
 
-function closeSeatModal(){
+function closeSeatModal() {
   document.getElementById('seat-modal-bg').classList.remove('show');
-  hideCheckoutConfirm();
-  currentModalSeat='';
-  // WALLET検索リセット
-  payMethod='cash';
-  selectedWalletId=null;
-  const inp=document.getElementById('wallet-search-inp');
-  if(inp)inp.value='';
-  const res=document.getElementById('wallet-result');
-  if(res)res.classList.remove('show');
+  currentSeat = '';
 }
 
-// ===== 会計処理 =====
-function getCheckoutTargetIds(){
-  const today=new Date().toDateString();
-  return Object.entries(orders)
-    .filter(([,o])=>
-      o.seat===currentModalSeat &&
-      new Date(o.ts).toDateString()===today &&
-      o.status!=='paid'
-    ).map(([id])=>id);
-}
-
-function showCheckoutConfirm(){
-  document.getElementById('checkout-btn-wrap').style.display='none';
-  document.getElementById('checkout-confirm-wrap').style.display='block';
-}
-function hideCheckoutConfirm(){
-  document.getElementById('checkout-confirm-wrap').style.display='none';
-  document.getElementById('checkout-btn-wrap').style.display='block';
-}
-
-// ===== WALLET連携 =====
-let payMethod='cash';       // 'cash' or 'wallet'
-let selectedWalletId=null;  // 選択中のcustomer ID
-let walletCustomers={};     // /customers のキャッシュ
-
-// 起動時に /customers をリアルタイムで取得
-function startWalletListener(){
-  db.ref('/customers').on('value',snap=>{
-    walletCustomers=snap.val()||{};
-  });
-}
-
-function selectPayMethod(method){
-  payMethod=method;
-  selectedWalletId=null;
-  document.getElementById('pay-cash-btn').classList.toggle('selected',method==='cash');
-  document.getElementById('pay-wallet-btn').classList.toggle('selected',method==='wallet');
-  const wrap=document.getElementById('wallet-search-wrap');
-  wrap.classList.toggle('show',method==='wallet');
-  document.getElementById('wallet-result').classList.remove('show');
-  document.getElementById('wallet-search-inp').value='';
-}
-
-function searchWallet(q){
-  selectedWalletId=null;
-  document.getElementById('wallet-result').classList.remove('show');
-  if(!q.trim())return;
-  const hit=Object.entries(walletCustomers).find(([,c])=>
-    c.name&&c.name.includes(q.trim())
-  );
-  if(!hit)return;
-  const [id,c]=hit;
-  selectedWalletId=id;
-  const total=getCurrentTotal();
-  const bal=c.balance||0;
-  const after=bal-total;
-  const balEl=document.getElementById('wc-balance');
-  document.getElementById('wc-name').textContent=c.name;
-  balEl.textContent='¥'+bal.toLocaleString();
-  balEl.className='wallet-balance'+(after<0?' insufficient':'');
-  document.getElementById('wc-after').textContent=
-    after<0?`残高不足（¥${Math.abs(after).toLocaleString()} 不足）`
-           :`支払い後残高：¥${after.toLocaleString()}`;
-  document.getElementById('wallet-result').classList.add('show');
-}
-
-function getCurrentTotal(){
-  const targetIds=getCheckoutTargetIds();
-  let total=0;
-  targetIds.forEach(id=>{
-    (orders[id]?.items||[]).forEach(it=>total+=it.price*it.qty);
-  });
-  return total;
-}
-
-function execCheckout(){
-  if(!currentModalSeat||!db){toast('エラー');return;}
-  const targetIds=getCheckoutTargetIds();
-  if(targetIds.length===0){toast('会計済みです');closeSeatModal();return;}
-  const total=getCurrentTotal();
-  const seat=currentModalSeat;
-
-  // WALLET払いの場合：残高チェック
-  if(payMethod==='wallet'){
-    if(!selectedWalletId){toast('⚠ お客さんを検索して選択してください');return;}
-    const c=walletCustomers[selectedWalletId];
-    if(!c){toast('❌ お客さんが見つかりません');return;}
-    if((c.balance||0)<total){toast('❌ 残高不足（¥'+((c.balance||0)).toLocaleString()+'）');return;}
-  }
-
-  toast('⏳ 処理中...');
-  let count=0;
-  let hasError=false;
-
-  function onOrdersDone(){
-    if(payMethod==='wallet'&&selectedWalletId){
-      // WALLETから引き落とし
-      const c=walletCustomers[selectedWalletId];
-      const newBal=(c.balance||0)-total;
-      db.ref('/customers/'+selectedWalletId).update({balance:newBal},function(err){
-        if(err){toast('❌ WALLET更新失敗: '+err.message);return;}
-        // 取引履歴に記録
-        db.ref('/transactions').push({
-          customerId:selectedWalletId,
-          type:'pay',
-          amount:total,
-          seat:seat,
-          ts:Date.now()
-        });
-        toast('✅ '+seat+' WALLET会計完了 ¥'+total.toLocaleString()+' → 残高¥'+newBal.toLocaleString());
-        closeSeatModal();
-      });
-    } else {
-      toast('✅ '+seat+' 会計完了 ¥'+total.toLocaleString());
-      closeSeatModal();
-    }
-  }
-
-  function onDone(error){
-    if(error){hasError=true;toast('❌ 失敗: '+error.message);return;}
-    count++;
-    if(count===targetIds.length)onOrdersDone();
-  }
-  targetIds.forEach(function(id){
-    db.ref('/orders/'+id+'/status').set('paid',onDone);
-  });
-  setTimeout(function(){
-    if(count<targetIds.length&&!hasError){
-      toast('⚠ タイムアウト');
-    }
-  },8000);
-}
-
-// ===== モーダル =====
-function openModal(){
-  document.getElementById('cfg-url').value=cfg.url;
-  document.getElementById('cfg-key').value=cfg.key;
-  document.getElementById('modal-bg').classList.add('show');
-}
-function closeModal(){document.getElementById('modal-bg').classList.remove('show');}
-function saveAndConnect(){
-  const url=document.getElementById('cfg-url').value.trim();
-  const key=document.getElementById('cfg-key').value.trim();
-  if(!url||!key){toast('URLとAPIキーを入力してください');return;}
-  cfg={url,key};
-  try{localStorage.setItem(CFG_KEY,JSON.stringify(cfg));}catch(e){}
-  closeModal();
-  connect();
-}
-document.getElementById('modal-bg').addEventListener('click',e=>{
-  if(e.target===document.getElementById('modal-bg'))closeModal();
+// モーダル背景クリックで閉じる
+document.getElementById('seat-modal-bg').addEventListener('click', function(e) {
+  if (e.target === this) closeSeatModal();
 });
 
-// ===== 起動 =====
-connect();
+// ===== 支払い方法 =====
+function setPayMethod(method) {
+  payMethod = method;
+  document.getElementById('pay-cash').classList.toggle('on', method==='cash');
+  document.getElementById('pay-wallet').classList.toggle('on', method==='wallet');
+  document.getElementById('wallet-area').style.display = method==='wallet' ? 'block' : 'none';
+  selectedCustomerId = null;
+  document.getElementById('wallet-result-box').classList.remove('show');
+  document.getElementById('wallet-inp').value = '';
+}
 
-// 画面スリープ対策：定期的にダミーアクセス
-setInterval(()=>{if(db&&connected)db.ref('/.info/connected').once('value');},60000);
+// ===== WALLET検索 =====
+function searchWallet(q) {
+  selectedCustomerId = null;
+  document.getElementById('wallet-result-box').classList.remove('show');
+  if (!q.trim()) return;
+  const hit = Object.entries(customers).find(([,c]) => c.name && c.name.includes(q.trim()));
+  if (!hit) { toast('見つかりません'); return; }
+  const [id,c] = hit;
+  selectedCustomerId = id;
+  const today = new Date().toDateString();
+  const seatOrders = Object.values(orders).filter(o =>
+    o.seat===currentSeat && new Date(o.ts).toDateString()===today && o.status!=='paid'
+  );
+  let total = 0;
+  seatOrders.forEach(o => (o.items||[]).forEach(it => total += it.price*it.qty));
+  const bal = c.balance||0;
+  const after = bal - total;
+  document.getElementById('w-name').textContent = c.name;
+  const balEl = document.getElementById('w-bal');
+  balEl.textContent = '¥' + bal.toLocaleString();
+  balEl.className = 'wallet-bal' + (after<0?' ng':'');
+  document.getElementById('w-after').textContent = after<0
+    ? `残高不足（¥${Math.abs(after).toLocaleString()} 不足）`
+    : `支払い後残高：¥${after.toLocaleString()}`;
+  document.getElementById('wallet-result-box').classList.add('show');
+}
+
+// ===== 会計実行 =====
+function doCheckout() {
+  if (!db) { toast('Firebase未接続'); return; }
+  if (!currentSeat) { toast('エラー'); return; }
+  if (payMethod==='wallet' && !selectedCustomerId) {
+    toast('お客さんを検索して選択してください');
+    return;
+  }
+  const today = new Date().toDateString();
+  const targetIds = Object.entries(orders)
+    .filter(([,o]) => o.seat===currentSeat && new Date(o.ts).toDateString()===today && o.status!=='paid')
+    .map(([id]) => id);
+  if (!targetIds.length) { toast('会計済みです'); closeSeatModal(); return; }
+  let total = 0;
+  targetIds.forEach(id => (orders[id].items||[]).forEach(it => total += it.price*it.qty));
+  if (payMethod==='wallet') {
+    const c = customers[selectedCustomerId];
+    if (!c || (c.balance||0) < total) { toast('残高不足'); return; }
+  }
+  toast('⏳ 処理中...');
+  let done = 0;
+  targetIds.forEach(id => {
+    db.ref('/orders/'+id+'/status').set('paid', err => {
+      if (err) { toast('❌ 失敗: '+err.message); return; }
+      done++;
+      if (done === targetIds.length) {
+        if (payMethod==='wallet' && selectedCustomerId) {
+          const c = customers[selectedCustomerId];
+          const newBal = (c.balance||0) - total;
+          db.ref('/customers/'+selectedCustomerId+'/balance').set(newBal, err2 => {
+            if (err2) { toast('⚠ WALLET更新失敗'); return; }
+            db.ref('/transactions').push({
+              customerId: selectedCustomerId,
+              type: 'pay', amount: total, seat: currentSeat, ts: Date.now()
+            });
+            toast('✅ ' + currentSeat + ' WALLET会計完了 ¥'+total.toLocaleString()+' 残高¥'+newBal.toLocaleString());
+            closeSeatModal();
+          });
+        } else {
+          toast('✅ ' + currentSeat + ' 会計完了 ¥'+total.toLocaleString());
+          closeSeatModal();
+        }
+      }
+    });
+  });
+}
+
+// ===== Firebase設定モーダル =====
+function openCfgModal() {
+  document.getElementById('cfg-url').value = cfg.url;
+  document.getElementById('cfg-key').value = cfg.key;
+  document.getElementById('cfg-modal-bg').classList.add('show');
+}
+function closeCfgModal() { document.getElementById('cfg-modal-bg').classList.remove('show'); }
+function saveAndConnect() {
+  const url = document.getElementById('cfg-url').value.trim();
+  const key = document.getElementById('cfg-key').value.trim();
+  if (!url||!key) { toast('入力してください'); return; }
+  cfg = {url,key};
+  try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch(e) {}
+  closeCfgModal();
+  connect();
+}
+
+// ===== 起動 =====
+window.addEventListener('load', () => { connect(); });
 </script>
 </body>
 </html>
